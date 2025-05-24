@@ -56,8 +56,8 @@ const App = () => {
       const line = generator.line(X1, Y1, e.clientX, e.clientY);
       rc.draw(line);
     } else if (selectedShape == "Rectangle") {
-      const height = Math.abs(e.clientY - rectPosition.Y);
-      const width = Math.abs(e.clientX - rectPosition.X);
+      const height = e.clientY - rectPosition.Y;
+      const width = e.clientX - rectPosition.X;
       setRectPosition((prev) => {
         return { ...prev, height, width };
       });
