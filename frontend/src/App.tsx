@@ -30,6 +30,7 @@ const App = () => {
   const [element, setElement] = useState<Element | null>(null);
   const [grabbedElement, setGrabbedElement] = useState<Element | null>(null);
 
+  console.log(selectedShape);
   const [options] = useState({
     roughness: 1.5,
     strokeWidth: 1.2,
@@ -51,7 +52,10 @@ const App = () => {
 
     ctx?.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
 
-    localStorage.setItem("elements", JSON.stringify(elements));
+    const elementsC = elements.map((elem) => {
+      return { ...elem, color: undefined };
+    });
+    localStorage.setItem("elements", JSON.stringify(elementsC));
 
     elements.forEach((elem: Element) => {
       const { X1, Y1, X2, Y2 } = elem;
@@ -118,7 +122,6 @@ const App = () => {
     for (let i = elements.length - 1; i >= 0; i--) {
       const isElemThere = elementThere(elements[i], e.clientX, e.clientY);
 
-
       if (isElemThere) {
         const updatedElements = elements.map((el) =>
           el === elements[i]
@@ -146,25 +149,40 @@ const App = () => {
     });
     setElements(filtered);
   };
-  const handleDelete = useCallback(
+  const handleDelete = useCallback(() => {
+    const updatedElements = elements.filter((elem) => {
+      return elem.id != grabbedElement?.id;
+    });
+    setElements(updatedElements);
+    setGrabbedElement(null);
+  }, [grabbedElement?.id, elements]);
+
+  const handleKeyPress = useCallback(
     (e: KeyboardEvent) => {
-      if (grabbedElement && e.key == "Backspace") {
-        const updatedElements = elements.filter((elem) => {
-          return elem.id != grabbedElement.id;
+      if (!grabbedElement) {
+        return;
+      }
+      console.log(e.key);
+      if (e.key == "Backspace") {
+        handleDelete();
+      } else if (e.key == "Escape") {
+        const updatedElements = elements.map((e) => {
+          return { ...e, color: "black" };
         });
         setElements(updatedElements);
         setGrabbedElement(null);
+        setSelectedShape("Rectangle");
       }
     },
-    [elements, grabbedElement]
+    [handleDelete, grabbedElement, elements]
   );
 
   useEffect(() => {
-    window.document.addEventListener("keydown", handleDelete);
+    window.document.addEventListener("keydown", handleKeyPress);
     return () => {
-      window.document.removeEventListener("keydown", handleDelete);
+      window.document.removeEventListener("keydown", handleKeyPress);
     };
-  }, [handleDelete]);
+  }, [handleKeyPress]);
 
   const handleMouseMove = (e: MouseEvent) => {
     if (isDrawing) {
@@ -177,6 +195,32 @@ const App = () => {
         Y2: e.clientY,
         id,
       });
+    }
+    if (grabbedElement) {
+      if (selectedShape == "Grab") {
+        const width = grabbedElement.X2 - grabbedElement.X1;
+        const height = grabbedElement.Y2 - grabbedElement.Y1;
+
+        const centerX = e.clientX;
+        const centerY = e.clientY;
+
+        setElements((prev) =>
+          prev.map((elem) =>
+            elem.id === grabbedElement.id
+              ? {
+                  ...elem,
+                  X1: centerX - width / 2,
+                  Y1: centerY - height / 2,
+                  X2: centerX + width / 2,
+                  Y2: centerY + height / 2,
+                }
+              : elem
+          )
+        );
+
+        setPosX(e.clientX);
+        setPosY(e.clientY);
+      }
     }
   };
 
@@ -192,6 +236,17 @@ const App = () => {
       setElement(null);
     }
     setIsDrawing(false);
+
+    if (selectedShape == "Grab") {
+      if (!grabbedElement) {
+        setSelectedShape("Rectangle");
+        const updatedElements = elements.map((el) => {
+          return { ...el, color: "black" };
+        });
+        setElements(updatedElements);
+        setGrabbedElement(null);
+      }
+    }
   };
 
   const clearEverything = () => {
