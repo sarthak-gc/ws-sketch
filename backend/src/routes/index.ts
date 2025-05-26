@@ -1,6 +1,6 @@
 import express from "express";
 import userRoutes from "./user";
-import tabRoutes from "./draw";
+import tabRoutes from "./tab";
 
 const routes = express.Router();
 

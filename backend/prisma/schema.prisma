@@ -9,27 +9,28 @@ datasource db {
 }
 
 model User {
-  userId         String @unique @default(uuid())
+  userId         String @id @default(uuid())
   username       String @unique
   email          String @unique
   password       String
   tabs           Tabs[] @relation("user-tabs")
-  collaboratedIn Tabs   @relation("user-collaboration", fields: [userId], references: [tabId])
+  collaboratedIn Tabs[] @relation("user-collaboration")
 }
 
 model Tabs {
-  tabId    String  @unique @default(uuid())
-  userId   String
-  tabName  String  @default("New Tab")
-  elements String
-  editable Boolean @default(false)
-  private  Boolean @default(true)
+  tabId      String  @id @default(uuid())
+  userId     String
+  tabName    String  @default("New Tab")
+  elements   String?
+  isEditable Boolean @default(false)
+  isPrivate  Boolean @default(true)
 
-  accessCode   String?
-  sharableLink String?
+  accessCode           String?
+  accessCodeExpiration DateTime?
+  sharableLink         String?
 
   Collaborators User[] @relation("user-collaboration")
-  User          User   @relation("user-tabs", references: [userId], fields: [userId])
+  owner         User   @relation("user-tabs", references: [userId], fields: [userId])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
