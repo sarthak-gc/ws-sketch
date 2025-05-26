@@ -1,0 +1,36 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  userId         String @unique @default(uuid())
+  username       String @unique
+  email          String @unique
+  password       String
+  tabs           Tabs[] @relation("user-tabs")
+  collaboratedIn Tabs   @relation("user-collaboration", fields: [userId], references: [tabId])
+}
+
+model Tabs {
+  tabId    String  @unique @default(uuid())
+  userId   String
+  tabName  String  @default("New Tab")
+  elements String
+  editable Boolean @default(false)
+  private  Boolean @default(true)
+
+  accessCode   String?
+  sharableLink String?
+
+  Collaborators User[] @relation("user-collaboration")
+  User          User   @relation("user-tabs", references: [userId], fields: [userId])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
