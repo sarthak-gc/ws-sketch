@@ -6,16 +6,22 @@ import type { Element } from "../types/types";
 
 // for rectangle check x and y with x1 and y1, x1 +x2 and y1+y2(released corner), then with x1 and y1 + y2 and finally with y1 and x1+x2
 
-export const isInTheEdges = (Element: Element, x: number, y: number) => {
-  const { X1, Y1, X2, Y2 } = Element;
+export const isInTheEdges = (element: Element, x: number, y: number) => {
+  const { X1, Y1, X2, Y2 } = element;
 
-  const atTopLeft = x == X1 && y == Y1;
-  const atTopRight = x == X1 && y == Y2;
-  const atBottomLeft = x == X2 && y == Y1;
-  const atBottomRight = x == X2 && y == Y2;
+  const atTopLeft = Math.abs(x - X1) <= 10 && Math.abs(y - Y1) <= 10;
+  const atTopRight = Math.abs(x - X1) <= 10 && Math.abs(y - Y2) <= 10;
+  const atBottomLeft = Math.abs(x - X2) <= 10 && Math.abs(y - Y1) <= 10;
+  const atBottomRight = Math.abs(x - X2) <= 10 && Math.abs(y - Y2) <= 10;
 
   if (atTopLeft || atTopRight || atBottomLeft || atBottomRight) {
-    return { status: true, elem: Element.id };
+    let corner = "";
+    if (atTopLeft) corner = "TopLeft";
+    else if (atTopRight) corner = "TopRight";
+    else if (atBottomLeft) corner = "BottomLeft";
+    else if (atBottomRight) corner = "BottomRight";
+
+    return { status: true, elem: element.id, corner };
   }
 
   return { status: false };

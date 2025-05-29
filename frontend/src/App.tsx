@@ -7,19 +7,13 @@ import {
   type MouseEvent,
 } from "react";
 import { elementThere } from "./utils/elementThere";
+import type { Element } from "./types/types";
+import type { RoughCanvas } from "roughjs/bin/canvas";
+import type { Drawable } from "roughjs/bin/core";
+// import { isInTheEnds } from "./utils/isInTheEnds";
+// import { isInTheEdges } from "./utils/isInTheEdges";
 
 const generator = rough.generator();
-
-export type Element = {
-  shape: string;
-  X1: number;
-  Y1: number;
-  X2: number;
-  Y2: number;
-  color?: string;
-  id: string;
-};
-
 const App = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [selectedShape, setSelectedShape] = useState<string>("Rectangle");
@@ -58,6 +52,34 @@ const App = () => {
     strokeWidth: 1.2,
     seed: 1,
   });
+
+  const drawShape = (rc: RoughCanvas, shape: Drawable | null) => {
+    if (shape) {
+      rc.draw(shape);
+    }
+  };
+
+  const getShape = useCallback(
+    (element: Element) => {
+      const { X1, Y1, X2, Y2 } = element;
+      const height = Y2 - Y1;
+      const width = X2 - X1;
+
+      if (element.shape == "Line")
+        return generator.line(X1, Y1, X2, Y2, {
+          ...options,
+          stroke: element.color ? element.color : "black",
+        });
+      if (element.shape == "Rectangle")
+        return generator.rectangle(X1, Y1, width, height, {
+          ...options,
+          stroke: element.color ? element.color : "black",
+        });
+      return null;
+    },
+    [options]
+  );
+
   useEffect(() => {
     const storedElem = localStorage.getItem("elements");
     if (storedElem) {
@@ -80,97 +102,29 @@ const App = () => {
     localStorage.setItem("elements", JSON.stringify(elementsC));
 
     elements.forEach((elem: Element) => {
-      const { X1, Y1, X2, Y2 } = elem;
-
-      const height = Y2 - Y1;
-      const width = X2 - X1;
-
-      const shape =
-        elem.shape == "Line"
-          ? generator.line(X1, Y1, X2, Y2, {
-              ...options,
-              stroke: elem.color ? elem.color : "black",
-            })
-          : elem.shape == "Rectangle"
-          ? generator.rectangle(X1, Y1, width, height, {
-              ...options,
-              stroke: elem.color ? elem.color : "black",
-            })
-          : null;
-      if (shape) rc.draw(shape);
+      const shape = getShape(elem);
+      drawShape(rc, shape);
     });
 
     if (element) {
-      const { X1, Y1, X2, Y2 } = element;
-      const height = Y2 - Y1;
-      const width = X2 - X1;
-      const shape =
-        element.shape == "Line"
-          ? generator.line(X1, Y1, X2, Y2, {
-              ...options,
-              stroke: element.color ? element.color : "black",
-            })
-          : element.shape == "Rectangle"
-          ? generator.rectangle(X1, Y1, width, height, {
-              ...options,
-              stroke: element.color ? element.color : "black",
-            })
-          : null;
-
-      if (shape) {
-        rc.draw(shape);
-      }
+      const shape = getShape(element);
+      drawShape(rc, shape);
     }
-  }, [selectedShape, elements, element, options, grabbedElement]);
+  }, [elements, element, getShape]);
 
   const createElement = (e: Element) => {
-    const { shape, X1, Y1, X2, Y2, id } = e;
-    if (shape == "Line") {
-      setElement({ shape, X1, Y1, X2, Y2, id });
-    } else if (shape == "Rectangle") {
-      setElement({ shape, X1, Y1, X2, Y2, id });
+    const { shape } = e;
+    if (shape == "Line" || shape == "Rectangle") {
+      setElement(e);
     }
   };
-
-  const handleMouseDown = (e: MouseEvent) => {
-    if (selectedShape != "Grab") {
-      setIsDrawing(true);
-      setPosX(e.clientX);
-      setPosY(e.clientY);
-      return;
-    }
-
-    setIsDrawing(false);
-    for (let i = elements.length - 1; i >= 0; i--) {
-      const isElemThere = elementThere(elements[i], e.clientX, e.clientY);
-
-      if (isElemThere) {
-        const updatedElements = elements.map((el) =>
-          el === elements[i]
-            ? { ...el, color: "blue" }
-            : { ...el, color: "black" }
-        );
-        setElements(updatedElements);
-        setGrabbedElement({ ...elements[i] });
-        break;
-      } else {
-        setGrabbedElement(null);
-
-        const updatedElements = elements.map((e) => {
-          return { ...e, color: "black" };
-        });
-
-        setElements(updatedElements);
-      }
-    }
-  };
-
   const undo = () => {
     const filtered = elements.filter((_, index) => {
       return index !== elements.length - 1;
     });
     setElements(filtered);
   };
+
   const handleDelete = useCallback(() => {
     const updatedElements = elements.filter((elem) => {
       return elem.id != grabbedElement?.id;
@@ -206,6 +160,32 @@ const App = () => {
     };
   }, [handleKeyPress]);
 
+  const moveElement = (grabbedElement: Element, e: MouseEvent) => {
+    const width = grabbedElement.X2 - grabbedElement.X1;
+    const height = grabbedElement.Y2 - grabbedElement.Y1;
+
+    const centerX = e.clientX;
+    const centerY = e.clientY;
+    setElements((prev) =>
+      prev.map((elem) =>
+        elem.id === grabbedElement.id
+          ? {
+              ...elem,
+              X1: centerX - width / 2,
+              Y1: centerY - height / 2,
+              X2: centerX + width / 2,
+              Y2: centerY + height / 2,
+            }
+          : elem
+      )
+    );
+
+    setPosX(e.clientX);
+    setPosY(e.clientY);
+  };
+
+  // const resizeElement = (grabbedElement: Element, e: MouseEvent) => {};
+
   const handleMouseMove = (e: MouseEvent) => {
     if (isDrawing) {
       const id = crypto.randomUUID();
@@ -217,33 +197,74 @@ const App = () => {
         Y2: e.clientY,
         id,
       });
+      return;
     }
-    if (grabbedElement) {
-      if (selectedShape == "Grab") {
-        const width = grabbedElement.X2 - grabbedElement.X1;
-        const height = grabbedElement.Y2 - grabbedElement.Y1;
+    if (grabbedElement && selectedShape == "Grab") {
+      moveElement(grabbedElement, e);
+      return;
+    }
 
-        const centerX = e.clientX;
-        const centerY = e.clientY;
+    for (let i = elements.length - 1; i >= 0; i--) {
+      const isElemThere = elementThere(elements[i], e.clientX, e.clientY);
 
-        setElements((prev) =>
-          prev.map((elem) =>
-            elem.id === grabbedElement.id
-              ? {
-                  ...elem,
-                  X1: centerX - width / 2,
-                  Y1: centerY - height / 2,
-                  X2: centerX + width / 2,
-                  Y2: centerY + height / 2,
-                }
-              : elem
-          )
+      if (isElemThere) {
+        // // paxi garamla
+        // if (elements[i].shape === "Line") {
+        //   const result = isInTheEnds(elements[i], e.clientX, e.clientY);
+
+        //   if (result.status) {
+        //     console.log(result.status);
+        //     console.log(result.elem);
+        //     console.log(result.side);
+        //     setSelectedShape("Resize");
+        //     console.log("Resize brother");
+        //     continue;
+        //   }
+        // } else if (elements[i].shape == "Rectangle") {
+        //   if (isInTheEdges(elements[i], e.clientX, e.clientY).status) {
+        //     setSelectedShape("Resize");
+        //     console.log("Resize brother");
+        //     continue;
+        //   }
+        // }
+        setSelectedShape("Drag");
+        const updatedElements = elements.map((el) =>
+          el === elements[i]
+            ? { ...el, color: "blue" }
+            : { ...el, color: "black" }
         );
+        setElements(updatedElements);
+        if (grabbedElement?.id != elements[i].id) {
+          setGrabbedElement({ ...elements[i] });
+        }
 
-        setPosX(e.clientX);
-        setPosY(e.clientY);
+        break;
+      } else {
+        if (selectedShape == "Drag") setSelectedShape("Rectangle");
+
+        setGrabbedElement(null);
+        const updatedElements = elements.map((e) => {
+          return { ...e, color: "black" };
+        });
+
+        setElements(updatedElements);
       }
     }
+  };
+
+  const handleMouseDown = (e: MouseEvent) => {
+    if (grabbedElement && !isDrawing) {
+      setSelectedShape("Grab");
+      return;
+    }
+
+    if (selectedShape != "Grab") {
+      setIsDrawing(true);
+      setPosX(e.clientX);
+      setPosY(e.clientY);
+      return;
+    }
+    setIsDrawing(false);
   };
 
   const handleMouseUp = () => {
@@ -259,16 +280,15 @@ const App = () => {
     }
     setIsDrawing(false);
 
-    if (selectedShape == "Grab") {
-      if (!grabbedElement) {
-        setSelectedShape("Rectangle");
-        const updatedElements = elements.map((el) => {
-          return { ...el, color: "black" };
-        });
-        setElements(updatedElements);
-        setGrabbedElement(null);
-      }
+    if (selectedShape == "Grab" && !grabbedElement) {
+      setSelectedShape("Rectangle");
+      const updatedElements = elements.map((el) => {
+        return { ...el, color: "black" };
+      });
+      setElements(updatedElements);
+      setGrabbedElement(null);
     }
+    setSelectedShape("Rectangle");
   };
 
   const clearEverything = () => {
@@ -282,6 +302,7 @@ const App = () => {
   };
 
   return (
+    // <div className={`${grabbedElement && "cursor-move"}`}>
     <div>
       <Options
         selectedShape={selectedShape}
@@ -320,7 +341,7 @@ export const Options = ({
     <button onClick={clearEverything}>Clear</button>
 
     <button onClick={undo}>Remove last element</button>
-    {["Rectangle", "Line", "Grab"].map((shape) => (
+    {["Rectangle", "Line"].map((shape) => (
       <div key={shape}>
         <label htmlFor={shape}>{shape}</label>
         <input

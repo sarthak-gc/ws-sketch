@@ -1,12 +1,18 @@
 import type { Element } from "../types/types";
 
-export const isInTheEdges = (Element: Element, x: number, y: number) => {
-  const { X1, Y1, X2, Y2 } = Element;
+export const isInTheEnds = (element: Element, x: number, y: number) => {
+  const { X1, Y1, X2, Y2 } = element;
 
-  const atEnd1 = x == X1 && y == Y1;
-  const atEnd2 = x == X2 && y == Y2;
+  const atEnd1 = Math.abs(x - X1) <= 10 && Math.abs(y - Y1) <= 10;
+  const atEnd2 = Math.abs(x - X2) <= 10 && Math.abs(y - Y2) <= 10;
+
   if (atEnd1 || atEnd2) {
-    return { status: true, elem: Element.id };
+    const side = atEnd1 ? "TOP" : "Bottom";
+    return {
+      status: true,
+      elem: element.id,
+      side,
+    };
   }
 
   return { status: false };

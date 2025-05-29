@@ -45,10 +45,10 @@ export const elementThere = (element: Element, x: number, y: number) => {
   } else {
     const { X1, X2, Y1, Y2 } = element;
     if (
-      x + 5 >= Math.min(X1, X2) &&
-      x - 5 <= Math.max(X1, X2) &&
-      y + 5 >= Math.min(Y1, Y2) &&
-      y - 5 <= Math.max(Y1, Y2)
+      x + 10 >= Math.min(X1, X2) &&
+      x - 10 <= Math.max(X1, X2) &&
+      y + 10 >= Math.min(Y1, Y2) &&
+      y - 10 <= Math.max(Y1, Y2)
     ) {
       return true;
     }
