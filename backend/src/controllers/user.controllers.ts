@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { PrismaClient } from "../generated/prisma";
+import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 export const register = async (req: Request, res: Response) => {
@@ -28,11 +28,13 @@ export const login = async (req: Request, res: Response) => {
     const { username, password } = req.body;
     const user = await prisma.user.findUnique({ where: { username } });
     if (!user) {
-      return res.status(404).send({ message: "User not found" });
+      res.status(404).send({ message: "User not found" });
+      return;
     }
     if (await bcrypt.compare(password, user.password)) {
       const token = jwt.sign({ username }, "secret");
-      return res.status(200).send({ token });
+      res.status(200).send({ token });
+      return;
     }
     res.status(401).send({ message: "Invalid password" });
   } catch (error) {

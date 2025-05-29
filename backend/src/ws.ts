@@ -14,6 +14,7 @@ let elements: Element[] = [];
 
 let connections: WebSocket[] = [];
 
+console.log(elements);
 wss.on("connection", (socket: WebSocket) => {
   console.log("User connected");
   connections.push(socket);
