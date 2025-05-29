@@ -30,7 +30,29 @@ const App = () => {
   const [element, setElement] = useState<Element | null>(null);
   const [grabbedElement, setGrabbedElement] = useState<Element | null>(null);
 
-  console.log(selectedShape);
+  // useEffect(() => {
+  //   const socket = new WebSocket("ws://localhost:9000");
+
+  //   socket.onopen = () => {
+  //     socket.send(JSON.stringify(elements));
+  //   };
+
+  //   socket.onmessage = (event) => {
+  //     const data = event.data;
+  //     if (data) {
+  //       localStorage.setItem("elements", data);
+  //     }
+  //   };
+
+  //   socket.onerror = (error) => {
+  //     console.error("WebSocket error:", error);
+  //   };
+
+  //   return () => {
+  //     socket.close();
+  //   };
+  // }, [elements]);
+
   const [options] = useState({
     roughness: 1.5,
     strokeWidth: 1.2,
