@@ -1,54 +1,24 @@
-# React + TypeScript + Vite
+# Excali Draw Clone
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This project is a clone of Excali Draw, a web-based drawing application. It aims to replicate the core features and functionality of Excali Draw, providing a similar user experience.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Drawing shapes: The application allows users to draw shapes such as lines and rectangles on a canvas.
+- Shape selection: Users can select shapes to modify or delete them.
+- Real-time collaboration: The application utilizes WebSockets to enable real-time collaboration between users. Changes made by one user are instantly reflected on other connected clients.
+- Local storage: The application stores the drawing state locally, allowing users to continue their work even after closing the browser.
+- Undo functionality: Users can undo their last action, enabling them to experiment and correct mistakes easily.
+- Delete functionality: Users can delete selected shapes from the canvas.
+- Keyboard shortcuts: The application supports keyboard shortcuts for common actions like deleting selected shapes (Backspace) and deselecting shapes (Escape).
 
-## Expanding the ESLint configuration
+## Technologies Used
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- React: The application is built using React, a popular JavaScript library for building user interfaces.
+- rough.js: The drawing functionality is powered by rough.js, a JavaScript library for generating drawing shapes.
+- WebSockets: Real-time collaboration is achieved through the use of WebSockets, enabling bi-directional communication between the client and server.
+- LocalStorage: The application utilizes the browser's LocalStorage to store the drawing state locally.
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+## Development
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+This project is developed using modern web technologies and follows best practices for React applications. The code is organized into logical components, making it easy to understand and maintain.
