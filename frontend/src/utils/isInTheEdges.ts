@@ -1,6 +1,6 @@
 // first get teh mouse position, then check if element is there, if element exists at that point, check if the mouse is there at the edge of the shape,
 
-import type { Element } from "../App";
+import type { Element } from "../types/types";
 
 //  for lines , directly checking x with x1 and x2 and y with y1 and y2 work
 

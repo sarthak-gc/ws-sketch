@@ -1,4 +1,4 @@
-import type { Element } from "../App";
+import type { Element } from "../types/types";
 
 export const isInTheEdges = (Element: Element, x: number, y: number) => {
   const { X1, Y1, X2, Y2 } = Element;

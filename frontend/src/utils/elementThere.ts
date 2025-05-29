@@ -1,4 +1,4 @@
-import type { Element } from "../App";
+import type { Element } from "../types/types";
 
 // GPT dost
 function isPointOnLineSegment(
