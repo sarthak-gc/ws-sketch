@@ -26,6 +26,11 @@ const App = () => {
   const [posY, setPosY] = useState(0);
   const [element, setElement] = useState<Element | null>(null);
   const [grabbedElement, setGrabbedElement] = useState<Element | null>(null);
+  const [resizeElem, setResizeElement] = useState<Element | null>(null);
+  const [cornerSide, setCornerSide] = useState<{
+    corner?: string;
+    side?: string;
+  } | null>(null);
 
   // useEffect(() => {
   //   const socket = new WebSocket("ws://localhost:9000");
@@ -206,26 +211,50 @@ const App = () => {
       return;
     }
 
+    if (action == "Resizing" && resizeElem && cornerSide) {
+      setElements((prev) =>
+        prev.map((el) => {
+          if (el.id !== resizeElem.id) return el;
+
+          if (resizeElem.shape === "Line") {
+            if (cornerSide.side === "TOP") {
+              return { ...el, X1: e.clientX, Y1: e.clientY };
+            } else if (cornerSide.side === "Bottom") {
+              return { ...el, X2: e.clientX, Y2: e.clientY };
+            }
+          } else if (resizeElem.shape === "Rectangle") {
+            if (cornerSide.corner === "TopLeft") {
+              return { ...el, X1: e.clientX, Y1: e.clientY };
+            } else if (cornerSide.corner === "TopRight") {
+              return { ...el, Y1: e.clientY, X2: e.clientX };
+            } else if (cornerSide.corner === "BottomLeft") {
+              return { ...el, X1: e.clientX, Y2: e.clientY };
+            } else if (cornerSide.corner === "BottomRight") {
+              return { ...el, X2: e.clientX, Y2: e.clientY };
+            }
+          }
+
+          return el;
+        })
+      );
+      return;
+    }
+
     for (let i = elements.length - 1; i >= 0; i--) {
       const isElemThere = elementThere(elements[i], e.clientX, e.clientY);
 
       if (isElemThere) {
         if (elements[i].shape === "Line") {
           const result = isInTheEnds(elements[i], e.clientX, e.clientY);
-
-          if (result.status) {
-            console.log(result.status);
-            console.log(result.elem);
-            console.log(result.side);
-            setAction("Resizing");
-            console.log("Resize brother");
-            continue;
+          if (result.status && action !== "Resizing") {
+            setResizeElement(elements[i]);
+            break;
           }
-        } else if (elements[i].shape == "Rectangle") {
-          if (isInTheEdges(elements[i], e.clientX, e.clientY).status) {
-            setAction("Resizing");
-            console.log("Resize brother");
-            continue;
+        } else if (elements[i].shape === "Rectangle") {
+          const result = isInTheEdges(elements[i], e.clientX, e.clientY);
+          if (result.status && action !== "Resizing") {
+            setResizeElement(elements[i]);
+            break;
           }
         }
         setAction("Dragging");
@@ -244,6 +273,7 @@ const App = () => {
         if (action == "Dragging") setSelectedShape("Rectangle");
 
         setGrabbedElement(null);
+        setResizeElement(null);
         const updatedElements = elements.map((e) => {
           return { ...e, color: "black" };
         });
@@ -254,6 +284,22 @@ const App = () => {
   };
 
   const handleMouseDown = (e: MouseEvent) => {
+    if (resizeElem) {
+      setAction("Resizing");
+      if (resizeElem.shape === "Line") {
+        const result = isInTheEnds(resizeElem, e.clientX, e.clientY);
+        if (result.status) {
+          setCornerSide({ side: result.side });
+        }
+      } else if (resizeElem.shape === "Rectangle") {
+        const result = isInTheEdges(resizeElem, e.clientX, e.clientY);
+        if (result.status) {
+          setCornerSide({ corner: result.corner });
+        }
+      }
+      return;
+    }
+
     if (grabbedElement && action !== "Drawing") {
       setAction("Grabbing");
       return;
@@ -266,6 +312,7 @@ const App = () => {
       return;
     }
   };
+
   useEffect(() => {
     console.log(action);
   }, [action]);
@@ -281,6 +328,12 @@ const App = () => {
       setElements((prev) => [...prev, element]);
       setElement(null);
     }
+
+    setCornerSide(null);
+    if (resizeElem) {
+      setResizeElement(null);
+    }
+
     setAction(null);
 
     if (action == "Grabbing" && !grabbedElement) {

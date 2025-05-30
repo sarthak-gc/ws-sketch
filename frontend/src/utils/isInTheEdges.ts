@@ -10,8 +10,8 @@ export const isInTheEdges = (element: Element, x: number, y: number) => {
   const { X1, Y1, X2, Y2 } = element;
 
   const atTopLeft = Math.abs(x - X1) <= 10 && Math.abs(y - Y1) <= 10;
-  const atTopRight = Math.abs(x - X1) <= 10 && Math.abs(y - Y2) <= 10;
-  const atBottomLeft = Math.abs(x - X2) <= 10 && Math.abs(y - Y1) <= 10;
+  const atBottomLeft = Math.abs(x - X1) <= 10 && Math.abs(y - Y2) <= 10;
+  const atTopRight = Math.abs(x - X2) <= 10 && Math.abs(y - Y1) <= 10;
   const atBottomRight = Math.abs(x - X2) <= 10 && Math.abs(y - Y2) <= 10;
 
   if (atTopLeft || atTopRight || atBottomLeft || atBottomRight) {
