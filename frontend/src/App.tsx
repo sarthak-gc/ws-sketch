@@ -372,7 +372,7 @@ const App = () => {
           : grabbedElement
           ? "cursor-move"
           : "cursor-default"
-      }`}
+      } w-[max(100vh,100vw)]`}
     >
       <Options
         selectedShape={selectedShape}
@@ -407,7 +407,7 @@ export const Options = ({
   clearEverything,
   undo,
 }: ToolbarProps) => (
-  <div className="fixed bg-red-500 flex gap-40">
+  <div className="fixed bg-red-500 flex gap-40 w-full overflow-auto">
     <button onClick={clearEverything}>Clear</button>
 
     <button onClick={undo}>Remove last element</button>
