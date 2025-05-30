@@ -21,7 +21,6 @@ const App = () => {
   );
   const [action, setAction] = useState<string | null>();
   const [elements, setElements] = useState<Element[]>([]);
-  // const [isDrawing, setIsDrawing] = useState(false);
   const [posX, setPosX] = useState(0);
   const [posY, setPosY] = useState(0);
   const [element, setElement] = useState<Element | null>(null);
@@ -31,6 +30,9 @@ const App = () => {
     corner?: string;
     side?: string;
   } | null>(null);
+  const [cursorDirection, setCursorDirection] = useState<
+    "nwse-resize" | "nesw-resize" | null
+  >();
 
   // useEffect(() => {
   //   const socket = new WebSocket("ws://localhost:9000");
@@ -191,8 +193,6 @@ const App = () => {
     setPosY(e.clientY);
   };
 
-  // const resizeElement = (grabbedElement: Element, e: MouseEvent) => {};
-
   const handleMouseMove = (e: MouseEvent) => {
     if (action == "Drawing") {
       const id = crypto.randomUUID();
@@ -218,18 +218,24 @@ const App = () => {
 
           if (resizeElem.shape === "Line") {
             if (cornerSide.side === "TOP") {
+              setCursorDirection("nwse-resize");
               return { ...el, X1: e.clientX, Y1: e.clientY };
             } else if (cornerSide.side === "Bottom") {
+              setCursorDirection("nwse-resize");
               return { ...el, X2: e.clientX, Y2: e.clientY };
             }
           } else if (resizeElem.shape === "Rectangle") {
             if (cornerSide.corner === "TopLeft") {
+              setCursorDirection("nwse-resize");
               return { ...el, X1: e.clientX, Y1: e.clientY };
             } else if (cornerSide.corner === "TopRight") {
+              setCursorDirection("nesw-resize");
               return { ...el, Y1: e.clientY, X2: e.clientX };
             } else if (cornerSide.corner === "BottomLeft") {
+              setCursorDirection("nesw-resize");
               return { ...el, X1: e.clientX, Y2: e.clientY };
             } else if (cornerSide.corner === "BottomRight") {
+              setCursorDirection("nwse-resize");
               return { ...el, X2: e.clientX, Y2: e.clientY };
             }
           }
@@ -264,16 +270,17 @@ const App = () => {
             : { ...el, color: "black" }
         );
         setElements(updatedElements);
+        setResizeElement(null);
+        setCursorDirection(null);
         if (grabbedElement?.id != elements[i].id) {
           setGrabbedElement({ ...elements[i] });
         }
 
         break;
       } else {
-        if (action == "Dragging") setSelectedShape("Rectangle");
-
         setGrabbedElement(null);
         setResizeElement(null);
+        setCursorDirection(null);
         const updatedElements = elements.map((e) => {
           return { ...e, color: "black" };
         });
@@ -358,8 +365,15 @@ const App = () => {
   };
 
   return (
-    // <div className={`${grabbedElement && "cursor-move"}`}>
-    <div>
+    <div
+      className={`${
+        cursorDirection
+          ? `cursor-${cursorDirection}`
+          : grabbedElement
+          ? "cursor-move"
+          : "cursor-default"
+      }`}
+    >
       <Options
         selectedShape={selectedShape}
         setSelectedShape={setSelectedShape}
