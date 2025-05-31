@@ -454,18 +454,18 @@ const App = () => {
 
   const toggleModal = () => setIsModalOpen(!isModalOpen);
 
-  if (!isDesktop) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-gray-100">
-        <div className="bg-white shadow-md rounded px-8 py-6">
-          <p className="text-center text-gray-700">
-            Sorry, this application is not fully supported on your device at
-            this time. Please use a desktop for the best experience.
-          </p>
-        </div>
-      </div>
-    );
-  }
+  // if (!isDesktop) {
+  //   return (
+  //     <div className="flex items-center justify-center h-screen bg-gray-100">
+  //       <div className="bg-white shadow-md rounded px-8 py-6">
+  //         <p className="text-center text-gray-700">
+  //           Sorry, this application is not fully supported on your device at
+  //           this time. Please use a desktop for the best experience.
+  //         </p>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div
