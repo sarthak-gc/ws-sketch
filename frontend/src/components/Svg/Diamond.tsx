@@ -4,7 +4,7 @@
 
 // <!-- Circle -->
 
-// <!-- Rhombus -->
+// <!-- Diamond -->
 
 const Diamond = () => {
   return (
@@ -13,7 +13,7 @@ const Diamond = () => {
         points="10,0 20,10 10,20 0,10"
         stroke="black"
         fill="none"
-        stroke-width="2"
+        strokeWidth="2"
       />
     </svg>
   );

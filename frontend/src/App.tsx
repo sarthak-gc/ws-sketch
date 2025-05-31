@@ -7,18 +7,18 @@ import {
   type MouseEvent,
 } from "react";
 import { elementThere } from "./utils/elementThere";
-import type { Element } from "./types/types";
+import type { Element, Shapes } from "./types/types";
 import type { RoughCanvas } from "roughjs/bin/canvas";
 import type { Drawable } from "roughjs/bin/core";
 import { isInTheEnds } from "./utils/isInTheEnds";
 import { isInTheEdges } from "./utils/isInTheEdges";
+import { Options } from "./components/Toolbar";
+import type { Point } from "roughjs/bin/geometry";
 
 const generator = rough.generator();
 const App = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [selectedShape, setSelectedShape] = useState<"Rectangle" | "Line">(
-    "Rectangle"
-  );
+  const [selectedShape, setSelectedShape] = useState<Shapes>("Rectangle");
   const [action, setAction] = useState<string | null>();
   const [elements, setElements] = useState<Element[]>([]);
   const [posX, setPosX] = useState(0);
@@ -85,6 +85,50 @@ const App = () => {
           ...options,
           stroke: element.color ? element.color : "black",
         });
+
+      if (element.shape == "Circle") {
+        const centerX = X1 + width / 2;
+        const centerY = Y1 + height / 2;
+
+        return generator.ellipse(centerX, centerY, width, height, {
+          ...options,
+          stroke: element.color ? element.color : "black",
+        });
+      }
+
+      if (element.shape == "Arrow") {
+        // tauko kasari?
+        const line = generator.line(X1, Y1, X2, Y2, {
+          ...options,
+          stroke: element.color ? element.color : "black",
+        });
+
+        // let tilted1;
+        // let tilted2;
+
+        return line;
+      }
+
+      // gpt bro
+      if (element.shape === "Diamond") {
+        const centerX = X1 + width / 2;
+        const centerY = Y1 + height / 2;
+
+        const pointsObj = [
+          { x: centerX, y: Y1 },
+          { x: X2, y: centerY },
+          { x: centerX, y: Y2 },
+          { x: X1, y: centerY },
+        ];
+
+        const points: Point[] = pointsObj.map((point) => [point.x, point.y]);
+
+        return generator.polygon(points, {
+          ...options,
+          stroke: element.color ? element.color : "black",
+        });
+      }
+
       return null;
     },
     [options]
@@ -123,10 +167,7 @@ const App = () => {
   }, [elements, element, getShape]);
 
   const createElement = (e: Element) => {
-    const { shape } = e;
-    if (shape == "Line" || shape == "Rectangle") {
-      setElement(e);
-    }
+    setElement(e);
   };
   const undo = () => {
     const filtered = elements.filter((_, index) => {
@@ -156,7 +197,7 @@ const App = () => {
         });
         setElements(updatedElements);
         setGrabbedElement(null);
-        setSelectedShape("Rectangle");
+        // setSelectedShape("Rectangle");
       }
     },
     [handleDelete, grabbedElement, elements]
@@ -344,14 +385,12 @@ const App = () => {
     setAction(null);
 
     if (action == "Grabbing" && !grabbedElement) {
-      setSelectedShape("Rectangle");
       const updatedElements = elements.map((el) => {
         return { ...el, color: "black" };
       });
       setElements(updatedElements);
       setGrabbedElement(null);
     }
-    setSelectedShape("Rectangle");
   };
 
   const clearEverything = () => {
@@ -393,38 +432,3 @@ const App = () => {
 };
 
 export default App;
-
-type ToolbarProps = {
-  selectedShape: "Line" | "Rectangle";
-  setSelectedShape: (shape: "Line" | "Rectangle") => void;
-  clearEverything: () => void;
-  undo: () => void;
-};
-
-export const Options = ({
-  selectedShape,
-  setSelectedShape,
-  clearEverything,
-  undo,
-}: ToolbarProps) => (
-  <div className="fixed bg-red-500 flex gap-40 w-full overflow-auto">
-    <button onClick={clearEverything}>Clear</button>
-
-    <button onClick={undo}>Remove last element</button>
-    {["Rectangle", "Line"].map((shape) => (
-      <div key={shape}>
-        <label htmlFor={shape}>{shape}</label>
-        <input
-          type="radio"
-          id={shape}
-          name="shape"
-          value={shape}
-          checked={selectedShape === shape}
-          onChange={() =>
-            setSelectedShape(shape == "Line" ? "Line" : "Rectangle")
-          }
-        />
-      </div>
-    ))}
-  </div>
-);

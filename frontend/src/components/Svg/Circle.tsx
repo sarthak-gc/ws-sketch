@@ -7,7 +7,7 @@ const Circle = () => {
         r="8"
         stroke="black"
         fill="none"
-        stroke-width="2"
+        strokeWidth="2"
       />
     </svg>
   );

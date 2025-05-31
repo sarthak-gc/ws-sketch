@@ -7,3 +7,5 @@ export type Element = {
   color?: string;
   id: string;
 };
+
+export type Shapes = "Line" | "Rectangle" | "Arrow" | "Circle" | "Diamond";
