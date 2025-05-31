@@ -36,20 +36,24 @@ export default defineConfig({
         ],
       },
       manifest: {
-        name: "Your App Name",
-        short_name: "App Short Name",
-        description: "Your app description",
+        name: "WS Sketch",
+        short_name: "WSS",
+        start_url: "/",
+        display: "standalone",
+        background_color: "#000",
+        description:
+          "A web-based drawing app designed to help you sketch ideas quickly and collaborate in real-time. This guide will walk you through the app's features, how to use them, and what technologies power it.",
         theme_color: "#ffffff",
         icons: [
           {
-            src: "/icon-192x192.png",
+            src: "/icon-192x192.svg",
             sizes: "192x192",
-            type: "image/png",
+            type: "image/svg+xml",
           },
           {
-            src: "/icon-512x512.png",
+            src: "/icon-512x512.svg",
             sizes: "512x512",
-            type: "image/png",
+            type: "image/svg+xml",
           },
         ],
       },
