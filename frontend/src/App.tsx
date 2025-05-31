@@ -14,6 +14,8 @@ import { isInTheEnds } from "./utils/isInTheEnds";
 import { isInTheEdges } from "./utils/isInTheEdges";
 import { Options } from "./components/Toolbar";
 import type { Point } from "roughjs/bin/geometry";
+import Tutorial from "./components/Guide";
+import KeyboardShortcutsModal from "./components/Shortcuts";
 
 const generator = rough.generator();
 const App = () => {
@@ -33,6 +35,9 @@ const App = () => {
   const [cursorDirection, setCursorDirection] = useState<
     "nwse-resize" | "nesw-resize" | null
   >();
+  const [showTutorial, setShowTutorial] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // useEffect(() => {
   //   const socket = new WebSocket("ws://localhost:9000");
@@ -135,6 +140,11 @@ const App = () => {
   );
 
   useEffect(() => {
+    const showTutorial = localStorage.getItem("show_tutorial");
+    if (showTutorial == "false") {
+      setShowTutorial(false);
+    }
+    setIsLoading(false);
     const storedElem = localStorage.getItem("elements");
     if (storedElem) {
       setElements(JSON.parse(storedElem));
@@ -187,17 +197,46 @@ const App = () => {
   const handleKeyPress = useCallback(
     (e: KeyboardEvent) => {
       if (!grabbedElement) {
+        if (e.ctrlKey) {
+          switch (e.key) {
+            case "d":
+              clearEverything();
+              break;
+            case "s":
+              setIsModalOpen((prev) => !prev);
+              break;
+          }
+        }
+        switch (e.key) {
+          case "1":
+            setSelectedShape("Rectangle");
+            break;
+          case "2":
+            setSelectedShape("Line");
+            break;
+          case "3":
+            setSelectedShape("Arrow");
+            break;
+          case "4":
+            setSelectedShape("Circle");
+            break;
+          case "5":
+            setSelectedShape("Diamond");
+            break;
+          case "Backspace":
+            handleDelete();
+            break;
+          default:
+            break;
+        }
         return;
       }
-      if (e.key == "Backspace") {
-        handleDelete();
-      } else if (e.key == "Escape") {
+      if (e.key == "Escape") {
         const updatedElements = elements.map((e) => {
           return { ...e, color: "black" };
         });
         setElements(updatedElements);
         setGrabbedElement(null);
-        // setSelectedShape("Rectangle");
       }
     },
     [handleDelete, grabbedElement, elements]
@@ -361,10 +400,6 @@ const App = () => {
     }
   };
 
-  useEffect(() => {
-    console.log(action);
-  }, [action]);
-
   const handleMouseUp = () => {
     if (element) {
       const { X1, Y1, X2, Y2 } = element;
@@ -401,7 +436,10 @@ const App = () => {
     ctx?.clearRect(0, 0, window.innerWidth, window.innerHeight);
     setElements([]);
     localStorage.clear();
+    localStorage.setItem("show_tutorial", String(false));
   };
+
+  const toggleModal = () => setIsModalOpen(!isModalOpen);
 
   return (
     <div
@@ -411,9 +449,16 @@ const App = () => {
           : grabbedElement
           ? "cursor-move"
           : "cursor-default"
-      } w-[max(100vh,100vw)]`}
+      } w-[max(100vh,100vw)] bg-[#dadada]`}
+      style={{
+        backgroundImage:
+          "radial-gradient(circle, #cacaca 2px, transparent 1px)",
+        backgroundSize: "20px 20px",
+      }}
     >
       <Options
+        setShowTutorial={setShowTutorial}
+        toggleModal={toggleModal}
         selectedShape={selectedShape}
         setSelectedShape={setSelectedShape}
         clearEverything={clearEverything}
@@ -427,6 +472,9 @@ const App = () => {
         onMouseUp={handleMouseUp}
         onMouseMove={handleMouseMove}
       ></canvas>
+      {showTutorial && !isLoading && <Tutorial showTutorial={showTutorial} />}
+
+      {isModalOpen && <KeyboardShortcutsModal onClose={toggleModal} />}
     </div>
   );
 };
