@@ -38,6 +38,19 @@ const App = () => {
   const [showTutorial, setShowTutorial] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    const userAgent = navigator.userAgent;
+    const x = /Mobi|Android|iPhone|iPad|Windows Phone|Tablet/i.test(userAgent)
+      ? "Mobile"
+      : "Desktop";
+    if (x == "Desktop") {
+      setIsDesktop(true);
+    } else {
+      setIsDesktop(false);
+    }
+  }, []);
 
   // useEffect(() => {
   //   const socket = new WebSocket("ws://localhost:9000");
@@ -440,6 +453,19 @@ const App = () => {
   };
 
   const toggleModal = () => setIsModalOpen(!isModalOpen);
+
+  if (!isDesktop) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-gray-100">
+        <div className="bg-white shadow-md rounded px-8 py-6">
+          <p className="text-center text-gray-700">
+            Sorry, this application is not fully supported on your device at
+            this time. Please use a desktop for the best experience.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
