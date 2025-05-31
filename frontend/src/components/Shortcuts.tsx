@@ -31,7 +31,7 @@ const KeyboardShortcutsModal = ({ onClose }: { onClose: () => void }) => {
               <strong>Ctrl + D</strong>: Clear everything
             </li>
             <li>
-            Toggle Shortcuts Screen
+              <strong>Ctrl + S</strong>: Toggle Shortcuts Screen
             </li>
             <li>
               <strong>Escape</strong>: Deselect shape
