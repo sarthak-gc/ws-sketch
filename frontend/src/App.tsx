@@ -38,19 +38,19 @@ const App = () => {
   const [showTutorial, setShowTutorial] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isDesktop, setIsDesktop] = useState(false);
+  // const [isDesktop, setIsDesktop] = useState(false);
 
-  useEffect(() => {
-    const userAgent = navigator.userAgent;
-    const x = /Mobi|Android|iPhone|iPad|Windows Phone|Tablet/i.test(userAgent)
-      ? "Mobile"
-      : "Desktop";
-    if (x == "Desktop") {
-      setIsDesktop(true);
-    } else {
-      setIsDesktop(false);
-    }
-  }, []);
+  // useEffect(() => {
+  //   const userAgent = navigator.userAgent;
+  //   const x = /Mobi|Android|iPhone|iPad|Windows Phone|Tablet/i.test(userAgent)
+  //     ? "Mobile"
+  //     : "Desktop";
+  //   if (x == "Desktop") {
+  //     setIsDesktop(true);
+  //   } else {
+  //     setIsDesktop(false);
+  //   }
+  // }, []);
 
   // useEffect(() => {
   //   const socket = new WebSocket("ws://localhost:9000");
