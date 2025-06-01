@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { userUserInfoStore } from "../store/userInfoStore";
 import type { Shapes } from "../types/types";
 import Arrow from "./Svg/Arrow";
@@ -106,12 +107,18 @@ export const Options = ({
           ))}
         </div>
         <div className={`flex gap-4 ${isLoggedIn && "hidden"}`}>
-          <button className="hover:bg-[#dadada] px-4  p-2 cursor-pointer rounded-md bg-black text-white hover:text-black">
+          <Link
+            to="/login"
+            className="hover:bg-[#dadada] px-4  p-2 cursor-pointer rounded-md bg-black text-white hover:text-black"
+          >
             Login
-          </button>
-          <button className="hover:bg-[#dadada]  p-2 cursor-pointer rounded-sm bg-black text-white hover:text-black">
+          </Link>
+          <Link
+            to="/register"
+            className="hover:bg-[#dadada]  p-2 cursor-pointer rounded-sm bg-black text-white hover:text-black"
+          >
             Register
-          </button>
+          </Link>
         </div>
       </div>
     </div>
