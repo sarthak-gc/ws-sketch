@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { PrismaClient } from "@prisma/client";
+import cookieParser from "cookie-parser";
+
 const prisma = new PrismaClient();
 
 export const register = async (req: Request, res: Response) => {
@@ -9,7 +11,21 @@ export const register = async (req: Request, res: Response) => {
     const { username, password, email } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    await prisma.user.create({
+    const userExists = await prisma.user.findFirst({
+      where: {
+        OR: [{ username }, { email }],
+      },
+    });
+
+    if (userExists) {
+      res.status(500).json({
+        status: "error",
+        message:
+          "User with that username or email already exists, try different username or email",
+      });
+      return;
+    }
+    const user = await prisma.user.create({
       data: {
         username,
         password: hashedPassword,
@@ -17,9 +33,19 @@ export const register = async (req: Request, res: Response) => {
       },
     });
 
-    res.status(201).send({ message: "User created successfully" });
+    const token = jwt.sign(
+      { userId: user.userId },
+      (process.env.JWT_SECRET as string) || "SECRET"
+    );
+    res.cookie("token", token, { httpOnly: true });
+    res.json({
+      message: "User created successfully",
+      userId: user.userId,
+      username,
+    });
   } catch (error) {
-    res.status(500).send({ message: "Error creating user", error });
+    console.log(error);
+    res.status(500).json({ message: "Error creating user", error });
   }
 };
 
@@ -28,24 +54,29 @@ export const login = async (req: Request, res: Response) => {
     const { username, password } = req.body;
     const user = await prisma.user.findUnique({ where: { username } });
     if (!user) {
-      res.status(404).send({ message: "User not found" });
+      res.status(404).json({ message: "User not found" });
       return;
     }
     if (await bcrypt.compare(password, user.password)) {
-      const token = jwt.sign({ username }, "secret");
-      res.status(200).send({ token });
+      const token = jwt.sign(
+        { username },
+        (process.env.JWT_SECRET as string) || "SECRET"
+      );
+      res.cookie("token", token, { httpOnly: true });
+      res.json({ username, userId: user.userId });
       return;
     }
-    res.status(401).send({ message: "Invalid password" });
+    res.status(401).json({ message: "Invalid password" });
   } catch (error) {
-    res.status(500).send({ message: "Error logging in", error });
+    res.status(500).json({ message: "Error logging in", error });
   }
 };
 
 export const logout = async (req: Request, res: Response) => {
   try {
-    res.status(200).send({ message: "User logged out successfully" });
+    res.clearCookie("token");
+    res.json({ message: "User logged out successfully" });
   } catch (error) {
-    res.status(500).send({ message: "Error logging out", error });
+    res.status(500).json({ message: "Error logging out", error });
   }
 };
