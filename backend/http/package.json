@@ -1,8 +1,11 @@
 {
-  "name": "http",
+  "name": "http-server",
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
+  "scripts": {
+    "dev": "tsc -b && node dist/index.js"
+  },
   "dependencies": {
     "@prisma/client": "^6.8.2",
     "@types/cookie-parser": "^1.4.8",
