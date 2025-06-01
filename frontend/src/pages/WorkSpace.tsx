@@ -107,11 +107,7 @@ const WorkSpace = () => {
   }, []);
 
   useEffect(() => {
-    if (!import.meta.env.WS_URL_RENDER) {
-      console.error("INVALID WEBSOCKET SERVER")
-      return;
-    }
-    const ws = new WebSocket(import.meta.env.WS_URL_RENDER);
+    const ws = new WebSocket("https://ws-sketch-ws.onrender.com");
     socketInstance.current = ws;
 
     ws.onopen = () => {
@@ -158,7 +154,7 @@ const WorkSpace = () => {
   useEffect(() => {
     const socket = socketInstance.current;
 
-    if (socket && element) {
+    if (socket && element && socket.readyState === WebSocket.OPEN) {
       const message = {
         "123": element,
       };

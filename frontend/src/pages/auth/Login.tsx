@@ -24,7 +24,6 @@ const LoginPage = () => {
       const { userId } = response.data;
       const name = response.data.username;
 
-      console.log(userId, name);
       userUserInfoStore.getState().setUser({
         username: name,
         userId: userId,

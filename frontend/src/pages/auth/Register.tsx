@@ -27,7 +27,6 @@ const RegisterPage = () => {
       const { userId } = response.data;
       const name = response.data.username;
 
-      console.log(userId, name);
       userUserInfoStore.getState().setUser({
         username: name,
         userId: userId,
@@ -36,7 +35,6 @@ const RegisterPage = () => {
     } catch (err) {
       console.log(err);
       if (err instanceof AxiosError) {
-        console.log("hi");
         setError(err.response?.data.message || "Registration failed");
       } else {
         setError("Registration failed");
