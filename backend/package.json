@@ -4,7 +4,8 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "dev": "tsc -b && node dist/index.js"
+    "http-dev": "tsc -b && node dist/index.js",
+    "ws-dev": "tsc -b && node dist/ws.js"
   },
   "dependencies": {
     "@prisma/client": "^6.8.2",
