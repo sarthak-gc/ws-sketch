@@ -1,12 +1,8 @@
 {
-  "name": "backend",
+  "name": "http",
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
-  "scripts": {
-    "http-dev": "tsc -b && node dist/index.js",
-    "ws-dev": "tsc -b && node dist/ws.js"
-  },
   "dependencies": {
     "@prisma/client": "^6.8.2",
     "@types/cookie-parser": "^1.4.8",
@@ -20,8 +16,6 @@
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
-    "prisma": "^6.8.2",
-    "uuid": "^11.1.0",
-    "ws": "^8.18.2"
+    "prisma": "^6.8.2"
   }
 }
