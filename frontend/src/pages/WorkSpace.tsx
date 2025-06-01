@@ -107,7 +107,11 @@ const WorkSpace = () => {
   }, []);
 
   useEffect(() => {
-    const ws = new WebSocket("ws://localhost:9000");
+    if (!import.meta.env.WS_URL_RENDER) {
+      console.error("INVALID WEBSOCKET SERVER")
+      return;
+    }
+    const ws = new WebSocket(import.meta.env.WS_URL_RENDER);
     socketInstance.current = ws;
 
     ws.onopen = () => {
