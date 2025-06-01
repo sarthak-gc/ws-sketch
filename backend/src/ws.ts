@@ -1,7 +1,8 @@
 import WebSocket, { WebSocketServer } from "ws";
 import { v4 } from "uuid";
 
-const wss = new WebSocketServer({ port: 9000 });
+const port = Number(process.env.PORT) || 9000;
+const wss = new WebSocketServer({ port });
 interface Element {
   shape: string;
   X1: number;
