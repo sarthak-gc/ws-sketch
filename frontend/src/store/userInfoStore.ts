@@ -16,7 +16,10 @@ interface UserInfoI {
 export const userUserInfoStore = create<UserInfoI>()(
   persist(
     (set) => ({
-      user: null,
+      user: {
+        userId: "1234",
+        username: "ram",
+      },
       isLoggedIn: false,
       logout: () =>
         set({
