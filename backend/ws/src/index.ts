@@ -30,9 +30,7 @@ wss.on("connection", (socket: WebSocketWithId) => {
 
   socket.send(
     JSON.stringify({
-      state: "existing",
-      // elements: arrayfiedElements,
-      elements,
+      existingElements: Object.fromEntries(elements.entries()),
     })
   );
 

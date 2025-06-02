@@ -14,8 +14,9 @@ import useLocalStorage from "../hooks/useLocalStorage";
 import useCanvas from "../hooks/useCanvas";
 import useDebouncedWs from "../hooks/useDebouncedWs";
 import useSendCurrentDrawingElement from "../hooks/useDrawingElement";
-
-// import { userUserInfoStore } from "../store/userInfoStore";
+import CreateTab from "../components/CreateTab";
+import Sidebar from "../components/Sidebar";
+import { useUserInfoStore } from "../store/userInfoStore";
 
 const WorkSpace = () => {
   const [selectedShape, setSelectedShape] = useState<Shapes>("Rectangle");
@@ -37,14 +38,15 @@ const WorkSpace = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [id, setId] = useState("");
+  const isLoggedIn = useUserInfoStore().isLoggedIn;
 
   const isMobile = useDetectMobile();
   useBeforeInstallPrompt();
-  const { socketInstance, othersDrawing } = useWebSockets();
+  const { socketInstance, othersDrawings } = useWebSockets(setElements);
   useDebouncedWs(socketInstance, elements);
   useSendCurrentDrawingElement(socketInstance, element);
   useLocalStorage(setIsLoading, setElements, setShowTutorial);
-  const { canvasRef } = useCanvas(elements, element, othersDrawing);
+  const { canvasRef } = useCanvas(elements, element, othersDrawings);
 
   const createElement = (e: Element) => {
     setElement(e);
@@ -319,7 +321,7 @@ const WorkSpace = () => {
           : grabbedElement
           ? "cursor-move"
           : "cursor-default"
-      } w-[max(100vh,100vw)] bg-[#dadada]`}
+      } bg-[#dadada] relative overflow-auto`}
       style={{
         backgroundImage:
           "radial-gradient(circle, #cacaca 2px, transparent 1px)",
@@ -345,6 +347,8 @@ const WorkSpace = () => {
       {showTutorial && !isLoading && <Tutorial showTutorial={showTutorial} />}
 
       {isModalOpen && <KeyboardShortcutsModal onClose={toggleModal} />}
+      {isLoggedIn && <CreateTab />}
+      {isLoggedIn && <Sidebar />}
     </div>
   );
 };

@@ -7,7 +7,7 @@ import { drawShape, getShape } from "../utils/canvas/draw";
 const useCanvas = (
   elements: Element[],
   element: Element | null,
-  othersDrawing: Element | undefined
+  othersDrawings: Element[]
 ) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
@@ -34,12 +34,13 @@ const useCanvas = (
       drawShape(rc, shape);
     }
 
-    if (othersDrawing) {
-      const shape = getShape(othersDrawing);
-      console.log("other drawing shape", shape);
-      drawShape(rc, shape);
+    if (othersDrawings.length > 0) {
+      othersDrawings.forEach((drawing) => {
+        const shape = getShape(drawing);
+        drawShape(rc, shape);
+      });
     }
-  }, [elements, element, othersDrawing]);
+  }, [elements, element, othersDrawings]);
 
   return { canvasRef };
 };

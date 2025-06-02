@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AXIOS_USER } from "../../utils/axios/axios";
-import { userUserInfoStore } from "../../store/userInfoStore";
+import { useUserInfoStore } from "../../store/userInfoStore";
 
 const LoginPage = () => {
   const [username, setUsername] = useState("");
@@ -24,7 +24,7 @@ const LoginPage = () => {
       const { userId } = response.data;
       const name = response.data.username;
 
-      userUserInfoStore.getState().setUser({
+      useUserInfoStore.getState().setUser({
         username: name,
         userId: userId,
       });

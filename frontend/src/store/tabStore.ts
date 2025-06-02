@@ -15,7 +15,7 @@ export const useTabStore = create<TabStoreI>()(
     }),
     {
       name: "Tab",
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => sessionStorage),
     }
   )
 );

@@ -19,6 +19,10 @@ const App = () => {
       path: "/",
       element: <Anyone element={<WorkSpace />} />,
     },
+    {
+      path: "/:tabId",
+      element: <Anyone element={<WorkSpace />} />,
+    },
   ]);
   return <RouterProvider router={router} />;
 };

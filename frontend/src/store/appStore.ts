@@ -20,6 +20,7 @@ interface AppI {
   tabs: TabVisualI[];
   recent5Tabs: TabI[];
 
+  addTab: (tab: TabVisualI) => void;
   setTabs: (tabs: TabVisualI[]) => void;
   setRecent5Tabs: (tab: TabI) => void;
 
@@ -32,6 +33,12 @@ export const useAppStore = create<AppI>()(
       tabs: [],
       recent5Tabs: [],
       setTabs: (tabs: TabVisualI[]) => set({ tabs }),
+
+      addTab: (tab: TabVisualI) =>
+        set((prev) => ({
+          tabs: [...prev.tabs, tab],
+        })),
+
       setRecent5Tabs: (tab: TabI) =>
         set((state) => {
           const updatedTabs = [
@@ -46,7 +53,7 @@ export const useAppStore = create<AppI>()(
     }),
     {
       name: "App",
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => sessionStorage),
     }
   )
 );

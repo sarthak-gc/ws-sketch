@@ -27,7 +27,7 @@ export const useCodeStore = create<LinkStoreI>()(
     }),
     {
       name: "Codes",
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => sessionStorage),
     }
   )
 );

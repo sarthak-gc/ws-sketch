@@ -3,7 +3,7 @@ import { useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AXIOS_USER } from "../../utils/axios/axios";
 import { AxiosError } from "axios";
-import { userUserInfoStore } from "../../store/userInfoStore";
+import { useUserInfoStore } from "../../store/userInfoStore";
 
 const RegisterPage = () => {
   const [username, setUsername] = useState("");
@@ -27,7 +27,7 @@ const RegisterPage = () => {
       const { userId } = response.data;
       const name = response.data.username;
 
-      userUserInfoStore.getState().setUser({
+      useUserInfoStore.getState().setUser({
         username: name,
         userId: userId,
       });
@@ -104,6 +104,13 @@ const RegisterPage = () => {
           </p>
         </div>
       </div>
+      <Link
+        onClick={() => localStorage.clear()}
+        to="/"
+        className=" text-white  px-4 py-2 absolute bottom-10 bg-gray-500 rounded-md hover:bg-black cursor-pointer"
+      >
+        Try first
+      </Link>
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { userUserInfoStore } from "../store/userInfoStore";
+import { useUserInfoStore } from "../store/userInfoStore";
 import type { Shapes } from "../types/types";
 import Arrow from "./Svg/Arrow";
 import Circle from "./Svg/Circle";
@@ -25,9 +25,9 @@ export const Options = ({
   toggleModal,
   setShowTutorial,
 }: ToolbarProps) => {
-  const isLoggedIn = userUserInfoStore().isLoggedIn;
+  const isLoggedIn = useUserInfoStore().isLoggedIn;
   return (
-    <div className="fixed flex  w-full overflow-auto items-center justify-center  ">
+    <div className="fixed flex  w-full  items-center justify-center">
       <div className="md:w-fit w-full  flex gap-4 overflow-auto items-center  fixed top-3  z-10 shadow-lg  bg-white rounded-2xl px-2">
         <button
           className={

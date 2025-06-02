@@ -1,13 +1,15 @@
-import { useEffect, useRef, useState } from "react";
-import { userUserInfoStore } from "../store/userInfoStore";
+import { useEffect, useRef, useState, type SetStateAction } from "react";
+import { useUserInfoStore } from "../store/userInfoStore";
 import type { Element } from "../types/types";
 
-const useWebSockets = () => {
-  const [othersDrawing, setOthersDrawing] = useState<Element>();
+const useWebSockets = (
+  setElements: React.Dispatch<SetStateAction<Element[]>>
+) => {
+  const [othersDrawings, setOthersDrawings] = useState<Element[]>([]);
   const socketInstance = useRef<WebSocket | null>(null);
 
   useEffect(() => {
-    const isLoggedIn = userUserInfoStore.getState().isLoggedIn;
+    const isLoggedIn = useUserInfoStore.getState().isLoggedIn;
 
     if (!isLoggedIn) {
       return;
@@ -32,8 +34,19 @@ const useWebSockets = () => {
         elem = e.data;
       } finally {
         if (elem != "UserId Needed") {
-          // ! ----------------------------------
-          setOthersDrawing(elem.drawingElements["sarthakgc"]);
+          const existingElements: Element[] = Array.from(
+            Object.values(elem.existingElements)
+          );
+
+          const drawingElements: Element[] = Array.from(
+            Object.values(elem.drawingElements || {})
+          );
+          console.log(drawingElements);
+
+          setElements((prev) => {
+            return [...prev, ...existingElements];
+          });
+          setOthersDrawings(drawingElements);
         }
       }
     };
@@ -41,9 +54,9 @@ const useWebSockets = () => {
     return () => {
       ws.close();
     };
-  }, []);
+  }, [setElements]);
 
-  return { socketInstance, othersDrawing };
+  return { socketInstance, othersDrawings };
 };
 
 export default useWebSockets;

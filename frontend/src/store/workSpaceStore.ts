@@ -54,7 +54,7 @@ export const userWorkSpaceStore = create<workSpaceStoreI>()(
     }),
     {
       name: "app",
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => sessionStorage),
     }
   )
 );

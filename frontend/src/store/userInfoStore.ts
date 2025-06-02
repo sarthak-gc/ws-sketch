@@ -13,13 +13,10 @@ interface UserInfoI {
   setUser: (user: User) => void;
 }
 
-export const userUserInfoStore = create<UserInfoI>()(
+export const useUserInfoStore = create<UserInfoI>()(
   persist(
     (set) => ({
-      user: {
-        userId: "1234",
-        username: "ram",
-      },
+      user: null,
       isLoggedIn: false,
       logout: () =>
         set({
@@ -34,7 +31,7 @@ export const userUserInfoStore = create<UserInfoI>()(
     }),
     {
       name: "userInfo",
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => sessionStorage),
     }
   )
 );
