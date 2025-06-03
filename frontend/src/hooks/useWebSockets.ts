@@ -1,17 +1,20 @@
 import { useEffect, useRef, useState, type SetStateAction } from "react";
 import { useUserInfoStore } from "../store/userInfoStore";
-import type { Element } from "../types/types";
+import type { Collaborator, Element } from "../types/types";
 
 const useWebSockets = (
-  setElements: React.Dispatch<SetStateAction<Element[]>>
+  setElements: React.Dispatch<SetStateAction<Element[]>>,
+  collaborators: Collaborator[],
+  tabId: string | undefined
 ) => {
   const [othersDrawings, setOthersDrawings] = useState<Element[]>([]);
   const socketInstance = useRef<WebSocket | null>(null);
 
   useEffect(() => {
     const isLoggedIn = useUserInfoStore.getState().isLoggedIn;
-
-    if (!isLoggedIn) {
+    console.log(tabId);
+    // if (!isLoggedIn || collaborators.length == 0 || !tabId) {
+    if (!isLoggedIn || !tabId) {
       return;
     }
 
@@ -20,7 +23,12 @@ const useWebSockets = (
     socketInstance.current = ws;
 
     ws.onopen = () => {
-      // ws.send(JSON.stringify({}));
+      ws.send(
+        JSON.stringify({
+          type: "join",
+          tabId,
+        })
+      );
       console.log("connection established");
     };
 
@@ -54,7 +62,7 @@ const useWebSockets = (
     return () => {
       ws.close();
     };
-  }, [setElements]);
+  }, [setElements, collaborators, tabId]);
 
   return { socketInstance, othersDrawings };
 };

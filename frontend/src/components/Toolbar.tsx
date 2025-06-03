@@ -27,99 +27,97 @@ export const Options = ({
 }: ToolbarProps) => {
   const isLoggedIn = useUserInfoStore().isLoggedIn;
   return (
-    <div className="fixed flex  w-full  items-center justify-center">
-      <div className="md:w-fit w-full  flex gap-4 overflow-auto items-center  fixed top-3  z-10 shadow-lg  bg-white rounded-2xl px-2">
-        <button
-          className={
-            "p-2 cursor-pointer rounded-sm w-12 h-12 flex justify-center items-center hover:bg-[#e0dfffba]"
-          }
-          onClick={clearEverything}
+    <div className="md:w-fit w-full  flex gap-4 overflow-auto items-center  fixed top-3  z-10 shadow-lg  bg-white rounded-2xl px-2">
+      <button
+        className={
+          "p-2 cursor-pointer rounded-sm w-12 h-12 flex justify-center items-center hover:bg-[#e0dfffba]"
+        }
+        onClick={clearEverything}
+      >
+        <Delete />
+      </button>
+      <button
+        className={"hover:bg-[#e0dfffba]  p-2 cursor-pointer rounded-sm"}
+        onClick={undo}
+      >
+        Remove last
+      </button>
+      <button
+        className={"hover:bg-[#e0dfffba]  p-2 cursor-pointer rounded-sm"}
+        onClick={toggleModal}
+      >
+        Shortcuts
+      </button>
+      <button
+        onClick={() => {
+          setShowTutorial(true);
+          localStorage.setItem("show_tutorial", "true");
+        }}
+        className={"hover:bg-[#e0dfffba]  p-2 cursor-pointer rounded-sm"}
+      >
+        Tutorial
+      </button>
+      <div className="flex gap-4 p-2">
+        {["Rectangle", "Line", "Arrow", "Circle", "Diamond"].map((shape) => (
+          <div key={shape}>
+            <button
+              className={`${
+                selectedShape === shape
+                  ? "bg-[#e0dfff]"
+                  : "hover:bg-[#e0dfffba]"
+              }  p-2 cursor-pointer rounded-sm w-12 h-12 flex justify-center items-center`}
+              id={shape}
+              name="shape"
+              value={shape}
+              onClick={() => setSelectedShape(shape as Shapes)}
+            >
+              {shape === "Rectangle" && (
+                <div className="flex relative">
+                  <Rect />
+                  <span className="absolute -bottom-3 -right-3">1</span>
+                </div>
+              )}
+              {shape === "Line" && (
+                <div className="flex relative">
+                  <Line />
+                  <span className="absolute -bottom-3 -right-3">2</span>
+                </div>
+              )}
+              {shape === "Arrow" && (
+                <div className="flex relative">
+                  <Arrow />
+                  <span className="absolute -bottom-3 -right-3">3</span>
+                </div>
+              )}
+              {shape === "Circle" && (
+                <div className="flex relative">
+                  <Circle />
+                  <span className="absolute -bottom-3 -right-3">4</span>
+                </div>
+              )}
+              {shape === "Diamond" && (
+                <div className="flex relative">
+                  <Diamond />
+                  <span className="absolute -bottom-3 -right-3">5</span>
+                </div>
+              )}
+            </button>
+          </div>
+        ))}
+      </div>
+      <div className={`flex gap-4 ${isLoggedIn && "hidden"}`}>
+        <Link
+          to="/login"
+          className="hover:bg-[#dadada] px-4  p-2 cursor-pointer rounded-md bg-black text-white hover:text-black"
         >
-          <Delete />
-        </button>
-        <button
-          className={"hover:bg-[#e0dfffba]  p-2 cursor-pointer rounded-sm"}
-          onClick={undo}
+          Login
+        </Link>
+        <Link
+          to="/register"
+          className="hover:bg-[#dadada]  p-2 cursor-pointer rounded-sm bg-black text-white hover:text-black"
         >
-          Remove last
-        </button>
-        <button
-          className={"hover:bg-[#e0dfffba]  p-2 cursor-pointer rounded-sm"}
-          onClick={toggleModal}
-        >
-          Shortcuts
-        </button>
-        <button
-          onClick={() => {
-            setShowTutorial(true);
-            localStorage.setItem("show_tutorial", "true");
-          }}
-          className={"hover:bg-[#e0dfffba]  p-2 cursor-pointer rounded-sm"}
-        >
-          Tutorial
-        </button>
-        <div className="flex gap-4 p-2">
-          {["Rectangle", "Line", "Arrow", "Circle", "Diamond"].map((shape) => (
-            <div key={shape}>
-              <button
-                className={`${
-                  selectedShape === shape
-                    ? "bg-[#e0dfff]"
-                    : "hover:bg-[#e0dfffba]"
-                }  p-2 cursor-pointer rounded-sm w-12 h-12 flex justify-center items-center`}
-                id={shape}
-                name="shape"
-                value={shape}
-                onClick={() => setSelectedShape(shape as Shapes)}
-              >
-                {shape === "Rectangle" && (
-                  <div className="flex relative">
-                    <Rect />
-                    <span className="absolute -bottom-3 -right-3">1</span>
-                  </div>
-                )}
-                {shape === "Line" && (
-                  <div className="flex relative">
-                    <Line />
-                    <span className="absolute -bottom-3 -right-3">2</span>
-                  </div>
-                )}
-                {shape === "Arrow" && (
-                  <div className="flex relative">
-                    <Arrow />
-                    <span className="absolute -bottom-3 -right-3">3</span>
-                  </div>
-                )}
-                {shape === "Circle" && (
-                  <div className="flex relative">
-                    <Circle />
-                    <span className="absolute -bottom-3 -right-3">4</span>
-                  </div>
-                )}
-                {shape === "Diamond" && (
-                  <div className="flex relative">
-                    <Diamond />
-                    <span className="absolute -bottom-3 -right-3">5</span>
-                  </div>
-                )}
-              </button>
-            </div>
-          ))}
-        </div>
-        <div className={`flex gap-4 ${isLoggedIn && "hidden"}`}>
-          <Link
-            to="/login"
-            className="hover:bg-[#dadada] px-4  p-2 cursor-pointer rounded-md bg-black text-white hover:text-black"
-          >
-            Login
-          </Link>
-          <Link
-            to="/register"
-            className="hover:bg-[#dadada]  p-2 cursor-pointer rounded-sm bg-black text-white hover:text-black"
-          >
-            Register
-          </Link>
-        </div>
+          Register
+        </Link>
       </div>
     </div>
   );

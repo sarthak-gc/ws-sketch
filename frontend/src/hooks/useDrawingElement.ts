@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import type { Element } from "../types/types";
 import { useUserInfoStore } from "../store/userInfoStore";
+import { useTabStore } from "../store/tabStore";
 
 const useSendCurrentDrawingElement = (
   socketInstance: React.RefObject<WebSocket | null>,
@@ -12,7 +13,9 @@ const useSendCurrentDrawingElement = (
 
     if (socket && element && socket.readyState === WebSocket.OPEN && username) {
       const message = {
+        type: "draw",
         [username]: element,
+        tabId: useTabStore.getState().activeTabId,
       };
 
       socket.send(JSON.stringify(message));

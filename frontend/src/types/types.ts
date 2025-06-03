@@ -9,6 +9,11 @@ export type Element = {
   color?: string;
   id: string;
 };
+export type Collaborator = {
+  username: string;
+  userId: string;
+  hexCode: string;
+};
 
 export type Shapes = "Line" | "Rectangle" | "Arrow" | "Circle" | "Diamond";
 export type Actions = "Drawing" | "Resizing" | "Grabbing";

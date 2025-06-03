@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, type MouseEvent } from "react";
-import type { Actions, Element, Shapes } from "../types/types";
+import type { Actions, Collaborator, Element, Shapes } from "../types/types";
 
 import { isInTheEnds } from "../utils/isInTheEnds";
 import { elementThere } from "../utils/elementThere";
@@ -14,9 +14,12 @@ import useLocalStorage from "../hooks/useLocalStorage";
 import useCanvas from "../hooks/useCanvas";
 import useDebouncedWs from "../hooks/useDebouncedWs";
 import useSendCurrentDrawingElement from "../hooks/useDrawingElement";
-import CreateTab from "../components/CreateTab";
+import ControlPanel from "../components/ControlPanel";
 import Sidebar from "../components/Sidebar";
 import { useUserInfoStore } from "../store/userInfoStore";
+import { AXIOS_TAB } from "../utils/axios/axios";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { useTabStore } from "../store/tabStore";
 
 const WorkSpace = () => {
   const [selectedShape, setSelectedShape] = useState<Shapes>("Rectangle");
@@ -40,13 +43,42 @@ const WorkSpace = () => {
   const [id, setId] = useState("");
   const isLoggedIn = useUserInfoStore().isLoggedIn;
 
+  const navigate = useNavigate();
+  const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
+  const activeTabId = useTabStore().activeTabId;
+  const tabId = useParams().tabId;
+  useEffect(() => {
+    if (tabId && tabId !== activeTabId) {
+      const setActiveTabId = useTabStore.getState().setActiveTabId;
+      setActiveTabId(tabId);
+    }
+  }, [tabId, activeTabId]);
+
   const isMobile = useDetectMobile();
   useBeforeInstallPrompt();
-  const { socketInstance, othersDrawings } = useWebSockets(setElements);
+  const { socketInstance, othersDrawings } = useWebSockets(
+    setElements,
+    collaborators,
+    tabId
+  );
   useDebouncedWs(socketInstance, elements);
   useSendCurrentDrawingElement(socketInstance, element);
   useLocalStorage(setIsLoading, setElements, setShowTutorial);
   const { canvasRef } = useCanvas(elements, element, othersDrawings);
+
+  useEffect(() => {
+    const getCollaborators = async () => {
+      try {
+        const response = await AXIOS_TAB.get(`/${tabId}/detail`);
+        console.log(response.data.data.tab);
+        setCollaborators([]);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    getCollaborators();
+    return () => {};
+  }, [navigate, tabId]);
 
   const createElement = (e: Element) => {
     setElement(e);
@@ -321,33 +353,66 @@ const WorkSpace = () => {
           : grabbedElement
           ? "cursor-move"
           : "cursor-default"
-      } bg-[#dadada] relative overflow-auto`}
+      } bg-[#dadada] `}
       style={{
         backgroundImage:
           "radial-gradient(circle, #cacaca 2px, transparent 1px)",
         backgroundSize: "20px 20px",
       }}
     >
-      <Options
-        setShowTutorial={setShowTutorial}
-        toggleModal={toggleModal}
-        selectedShape={selectedShape}
-        setSelectedShape={setSelectedShape}
-        clearEverything={clearEverything}
-        undo={undo}
-      />
-      <canvas
-        ref={canvasRef}
-        width={window.innerWidth}
-        height={window.innerHeight}
-        onMouseDown={handleMouseDown}
-        onMouseUp={handleMouseUp}
-        onMouseMove={handleMouseMove}
-      ></canvas>
+      {!tabId || isLoggedIn ? (
+        <nav className="fixed flex  w-full  items-center justify-center">
+          <Options
+            setShowTutorial={setShowTutorial}
+            toggleModal={toggleModal}
+            selectedShape={selectedShape}
+            setSelectedShape={setSelectedShape}
+            clearEverything={clearEverything}
+            undo={undo}
+          />
+        </nav>
+      ) : null}
+
+      {tabId && !isLoggedIn ? (
+        <div className="relative">
+          <canvas
+            ref={canvasRef}
+            width={window.innerWidth}
+            height={window.innerHeight}
+            className="filter blur-[8px]"
+          ></canvas>
+          <div className="absolute w-full h-screen top-0 flex items-center justify-center flex-col gap-10">
+            <h1 className="text-6xl text-gray-500">Login to edit this tab</h1>
+            <div className={`flex gap-4 ${isLoggedIn && "hidden"}`}>
+              <Link
+                to="/login"
+                className="hover:bg-[#dadada] px-4  p-2 cursor-pointer rounded-md bg-black text-white hover:text-black"
+              >
+                Login
+              </Link>
+              <Link
+                to="/register"
+                className="hover:bg-[#dadada]  p-2 cursor-pointer rounded-sm bg-black text-white hover:text-black"
+              >
+                Register
+              </Link>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <canvas
+          ref={canvasRef}
+          width={window.innerWidth}
+          height={window.innerHeight}
+          onMouseDown={handleMouseDown}
+          onMouseUp={handleMouseUp}
+          onMouseMove={handleMouseMove}
+        ></canvas>
+      )}
       {showTutorial && !isLoading && <Tutorial showTutorial={showTutorial} />}
 
       {isModalOpen && <KeyboardShortcutsModal onClose={toggleModal} />}
-      {isLoggedIn && <CreateTab />}
+      {isLoggedIn && <ControlPanel />}
       {isLoggedIn && <Sidebar />}
     </div>
   );

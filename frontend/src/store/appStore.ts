@@ -32,7 +32,19 @@ export const useAppStore = create<AppI>()(
     (set) => ({
       tabs: [],
       recent5Tabs: [],
-      setTabs: (tabs: TabVisualI[]) => set({ tabs }),
+      setTabs: (tabs: TabVisualI[]) =>
+        set((prev) => {
+          const newTabsMap = new Map<string, TabVisualI>();
+          prev.tabs.forEach((tab) => {
+            newTabsMap.set(tab.tabId, tab);
+          });
+
+          tabs.forEach((tab) => {
+            newTabsMap.set(tab.tabId, tab);
+          });
+
+          return { tabs: Array.from(newTabsMap.values()) };
+        }),
 
       addTab: (tab: TabVisualI) =>
         set((prev) => ({

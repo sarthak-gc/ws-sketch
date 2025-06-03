@@ -3,14 +3,14 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
 interface TabStoreI {
-  activeTabId: string;
+  activeTabId: string | null;
   setActiveTabId: (id: string) => void;
 }
 
 export const useTabStore = create<TabStoreI>()(
   persist(
     (set) => ({
-      activeTabId: "",
+      activeTabId: null,
       setActiveTabId: (id: string) => set({ activeTabId: id }),
     }),
     {
