@@ -74,9 +74,8 @@ const WorkSpace = () => {
     const getCollaborators = async () => {
       try {
         const response = await AXIOS_TAB.get(`/${tabId}/detail`);
-        console.log(response.data.data.tab);
         setIsValidTab(true);
-        setCollaborators([]);
+        setCollaborators(response.data.data.tab.Collaborators);
       } catch (err) {
         if (err instanceof AxiosError)
           console.error(err.response?.data.message);

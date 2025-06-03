@@ -48,7 +48,6 @@ const useWebSockets = (
           const drawingElements: Element[] = Array.from(
             Object.values(elem.drawingElements || {})
           );
-          console.log(drawingElements);
 
           setElements((prev) => {
             return [...prev, ...existingElements];
