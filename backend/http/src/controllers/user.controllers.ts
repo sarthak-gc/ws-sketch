@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { PrismaClient } from "@prisma/client";
 import cookieParser from "cookie-parser";
+import { generateColor } from "../utils/hexcode";
 
 const prisma = new PrismaClient();
 
@@ -25,8 +26,10 @@ export const register = async (req: Request, res: Response) => {
       });
       return;
     }
+    const hexCode = generateColor(username);
     const user = await prisma.user.create({
       data: {
+        hexCode,
         username,
         password: hashedPassword,
         email,
@@ -34,7 +37,7 @@ export const register = async (req: Request, res: Response) => {
     });
 
     const token = jwt.sign(
-      { userId: user.userId },
+      { username, userId: user.userId },
       (process.env.JWT_SECRET as string) || "SECRET"
     );
     res.cookie("token", token, { httpOnly: true });
@@ -59,7 +62,7 @@ export const login = async (req: Request, res: Response) => {
     }
     if (await bcrypt.compare(password, user.password)) {
       const token = jwt.sign(
-        { username },
+        { username, userId: user.userId },
         (process.env.JWT_SECRET as string) || "SECRET"
       );
       res.cookie("token", token, { httpOnly: true });

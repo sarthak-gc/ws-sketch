@@ -7,12 +7,16 @@ import {
   generateAccessCode,
   getAllTabs,
   getTabDetail,
+  joinTab,
   removeTab,
 } from "../controllers/tab.controllers";
+import { authMiddleware } from "../middlewares/authMiddleware";
 const tabRoutes = express.Router();
 
+tabRoutes.use(authMiddleware);
 tabRoutes.get("/all", getAllTabs);
 tabRoutes.post("/create", createTab);
+tabRoutes.post("/join/:accessCode", joinTab);
 tabRoutes.post("/:tabId/remove", removeTab);
 tabRoutes.put("/:tabId/name", changeTabName);
 tabRoutes.put("/:tabId/visibility", changeTabVisibility);

@@ -4,6 +4,7 @@ CREATE TABLE "User" (
     "username" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "password" TEXT NOT NULL,
+    "hexCode" TEXT NOT NULL DEFAULT '000000',
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("userId")
 );

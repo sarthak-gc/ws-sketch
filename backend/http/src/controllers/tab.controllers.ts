@@ -35,9 +35,10 @@ export const getAllTabs = async (req: Request, res: Response) => {
 export const createTab = async (req: Request, res: Response) => {
   try {
     const userId = req.userId;
-    await prisma.tabs.create({ data: { userId } });
+    const tab = await prisma.tabs.create({ data: { userId } });
     res.json({
       status: "success",
+      tab,
     });
   } catch (error) {
     res
@@ -195,7 +196,9 @@ export const getTabDetail = async (req: Request, res: Response) => {
     const { tabId } = req.params;
     const tab = await prisma.tabs.findUnique({
       where: { tabId },
-      include: { Collaborators: true },
+      include: {
+        Collaborators: true,
+      },
     });
     if (!tab) {
       res.status(404).send({ message: "Tab not found" });
@@ -208,6 +211,10 @@ export const getTabDetail = async (req: Request, res: Response) => {
         locked = false;
       }
     });
+
+    if (userId == tab.userId) {
+      locked = false;
+    }
 
     if (locked) {
       res.json({
@@ -230,4 +237,80 @@ export const getTabDetail = async (req: Request, res: Response) => {
       .status(500)
       .json({ status: "error", message: "An unexpected error occurred" });
   }
+};
+
+export const joinTab = async (req: Request, res: Response) => {
+  const { accessCode } = req.params;
+  const userId = req.userId;
+  const tabs = await prisma.tabs.findMany({
+    where: {
+      accessCode,
+      accessCodeExpiration: {
+        gt: new Date(Date.now()),
+      },
+    },
+    include: {
+      Collaborators: {
+        select: {
+          userId: true,
+          hexCode: true,
+          username: true,
+        },
+      },
+    },
+  });
+
+  if (tabs.length == 0) {
+    res.json({
+      message: "Invalid Access Code",
+    });
+    return;
+  }
+  if (tabs.length > 1) {
+    res.json({
+      message: "Access Code Conflict, Ask them to generate a new code",
+    });
+    return;
+  }
+
+  const tab = tabs[0];
+
+  let alreadyJoined = tab.Collaborators.some((user) => user.userId === userId);
+
+  alreadyJoined = alreadyJoined || tab.userId == userId;
+
+  if (alreadyJoined) {
+    res.json({
+      message: "Already part of this tab",
+    });
+    return;
+  }
+  const tabDets = await prisma.tabs.update({
+    where: {
+      tabId: tab.tabId,
+    },
+    data: {
+      Collaborators: {
+        connect: {
+          userId,
+        },
+      },
+    },
+    include: {
+      Collaborators: {
+        select: {
+          userId: true,
+          hexCode: true,
+          username: true,
+          isOnline: true,
+        },
+      },
+    },
+  });
+
+  res.json({
+    message: "Room joined",
+    tabDets,
+  });
+  return;
 };

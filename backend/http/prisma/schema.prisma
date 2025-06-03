@@ -14,6 +14,9 @@ model User {
   password       String
   tabs           Tabs[] @relation("user-tabs")
   collaboratedIn Tabs[] @relation("user-collaboration")
+
+  hexCode  String  @default("000000")
+  isOnline Boolean @default(false)
 }
 
 model Tabs {

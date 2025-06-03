@@ -16,15 +16,19 @@ interface WebSocketWithId extends WebSocket {
   id: string;
 }
 
+interface ConnectionI {
+  [tabId: string]: WebSocketWithId[];
+}
+
 let elements: Map<string, Element> = new Map();
 let currentDrawingElement: Map<string, Element> = new Map();
 
-let connections: WebSocketWithId[] = [];
+let connections: ConnectionI = {};
 
 wss.on("connection", (socket: WebSocketWithId) => {
   socket.id = v4();
   console.log("User connected with id", socket.id);
-  connections.push(socket);
+  // connections.push(socket)
 
   // const arrayfiedElements = Array.from(elements.values());
 
@@ -38,39 +42,48 @@ wss.on("connection", (socket: WebSocketWithId) => {
     let msg;
     msg = JSON.parse(e.toLocaleString());
 
-    const id = Object.keys(msg)[0];
-    const value = Object.values(msg)[0] as Element;
+    if (msg.type == "draw") {
+      const username = Object.keys(msg)[1];
+      const value = Object.values(msg)[1] as Element;
 
-    if (!id) {
-      socket.send("UserId Needed");
-      return;
-    }
-
-    if (!elements.has(id)) {
-      currentDrawingElement.set(id, value);
-    }
-
-    elements.set(value.id, value);
-
-    let serializedCurrentDrawingElement = Object.fromEntries(
-      currentDrawingElement.entries()
-    );
-
-    const message = {
-      existingElements: elements,
-      drawingElements: serializedCurrentDrawingElement,
-    };
-    connections.forEach((connection) => {
-      if (connection.id != socket.id) {
-        connection.send(JSON.stringify(message));
+      if (!username) {
+        socket.send("username Needed");
+        return;
       }
-    });
+
+      if (!elements.has(username)) {
+        currentDrawingElement.set(username, value);
+      }
+
+      elements.set(value.id, value);
+
+      let serializedCurrentDrawingElement = Object.fromEntries(
+        currentDrawingElement.entries()
+      );
+
+      const message = {
+        existingElements: elements,
+        drawingElements: serializedCurrentDrawingElement,
+      };
+
+      connections[msg.tabId].forEach((connection) => {
+        if (connection.id != socket.id) {
+          connection.send(JSON.stringify(message));
+        }
+      });
+    }
+    if (msg.type == "join") {
+      if (!connections[msg.tabId]) {
+        connections[msg.tabId] = [];
+      }
+      connections[msg.tabId].push(socket);
+    }
   });
 
   socket.on("close", () => {
-    console.log("User Disconnected");
-    connections = connections.filter((connection) => {
-      return connection.id != socket.id;
-    });
+    // const a = Array.from(connections);
+    // a.findIndex(socket.id);
+    // console.log("something", a);
+    // connections.delete(a[something][0]);
   });
 });
