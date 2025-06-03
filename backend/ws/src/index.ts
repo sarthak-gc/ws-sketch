@@ -20,7 +20,7 @@ interface ConnectionI {
   [tabId: string]: WebSocketWithId[];
 }
 
-let elements: Map<string, Element> = new Map();
+let elements: Map<string, Map<string, Element>> = new Map();
 let currentDrawingElement: Map<string, Element> = new Map();
 
 let connections: ConnectionI = {};
@@ -31,12 +31,6 @@ wss.on("connection", (socket: WebSocketWithId) => {
   // connections.push(socket)
 
   // const arrayfiedElements = Array.from(elements.values());
-
-  socket.send(
-    JSON.stringify({
-      existingElements: Object.fromEntries(elements.entries()),
-    })
-  );
 
   socket.on("message", (e) => {
     let msg;
@@ -55,7 +49,7 @@ wss.on("connection", (socket: WebSocketWithId) => {
         currentDrawingElement.set(username, value);
       }
 
-      elements.set(value.id, value);
+      elements.get(msg.tabId)?.set(value.id, value);
 
       let serializedCurrentDrawingElement = Object.fromEntries(
         currentDrawingElement.entries()
@@ -72,18 +66,27 @@ wss.on("connection", (socket: WebSocketWithId) => {
         }
       });
     }
+
     if (msg.type == "join") {
+      socket.send(
+        JSON.stringify({
+          existingElements: Object.fromEntries(
+            elements.get(msg.tabId)?.entries() ?? []
+          ),
+        })
+      );
       if (!connections[msg.tabId]) {
         connections[msg.tabId] = [];
       }
       connections[msg.tabId].push(socket);
     }
   });
-
+  console.log(connections);
   socket.on("close", () => {
-    // const a = Array.from(connections);
-    // a.findIndex(socket.id);
-    // console.log("something", a);
-    // connections.delete(a[something][0]);
+    for (const tabId in connections) {
+      connections[tabId] = connections[tabId].filter(
+        (conn) => conn.id !== socket.id
+      );
+    }
   });
 });
