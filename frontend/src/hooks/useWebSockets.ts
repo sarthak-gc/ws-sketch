@@ -5,16 +5,15 @@ import type { Collaborator, Element } from "../types/types";
 const useWebSockets = (
   setElements: React.Dispatch<SetStateAction<Element[]>>,
   collaborators: Collaborator[],
-  tabId: string | undefined
+  tabId: string | undefined,
+  isValidTab: boolean
 ) => {
   const [othersDrawings, setOthersDrawings] = useState<Element[]>([]);
   const socketInstance = useRef<WebSocket | null>(null);
 
   useEffect(() => {
     const isLoggedIn = useUserInfoStore.getState().isLoggedIn;
-    console.log(tabId);
-    // if (!isLoggedIn || collaborators.length == 0 || !tabId) {
-    if (!isLoggedIn || !tabId) {
+    if (!isLoggedIn || !tabId || !isValidTab || collaborators.length == 0) {
       return;
     }
 
@@ -62,7 +61,7 @@ const useWebSockets = (
     return () => {
       ws.close();
     };
-  }, [setElements, collaborators, tabId]);
+  }, [setElements, collaborators, tabId, isValidTab]);
 
   return { socketInstance, othersDrawings };
 };

@@ -20,6 +20,7 @@ import { useUserInfoStore } from "../store/userInfoStore";
 import { AXIOS_TAB } from "../utils/axios/axios";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useTabStore } from "../store/tabStore";
+import { AxiosError } from "axios";
 
 const WorkSpace = () => {
   const [selectedShape, setSelectedShape] = useState<Shapes>("Rectangle");
@@ -44,6 +45,8 @@ const WorkSpace = () => {
   const isLoggedIn = useUserInfoStore().isLoggedIn;
 
   const navigate = useNavigate();
+  const [isValidTab, setIsValidTab] = useState<boolean>(false);
+  const [isTabDataLoading, setIsTabDataLoading] = useState<boolean>(true);
   const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
   const activeTabId = useTabStore().activeTabId;
   const tabId = useParams().tabId;
@@ -59,7 +62,8 @@ const WorkSpace = () => {
   const { socketInstance, othersDrawings } = useWebSockets(
     setElements,
     collaborators,
-    tabId
+    tabId,
+    isValidTab
   );
   useDebouncedWs(socketInstance, elements);
   useSendCurrentDrawingElement(socketInstance, element);
@@ -71,14 +75,24 @@ const WorkSpace = () => {
       try {
         const response = await AXIOS_TAB.get(`/${tabId}/detail`);
         console.log(response.data.data.tab);
+        setIsValidTab(true);
         setCollaborators([]);
       } catch (err) {
-        console.error(err);
+        if (err instanceof AxiosError)
+          console.error(err.response?.data.message);
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+        setIsTabDataLoading(false);
+        setIsValidTab(true);
+        navigate("/");
+      } finally {
+        if (!isValidTab) {
+          setIsTabDataLoading(false);
+        }
       }
     };
-    getCollaborators();
+    if (tabId) getCollaborators();
     return () => {};
-  }, [navigate, tabId]);
+  }, [navigate, tabId, isValidTab]);
 
   const createElement = (e: Element) => {
     setElement(e);
@@ -345,6 +359,47 @@ const WorkSpace = () => {
     );
   }
 
+  if (isTabDataLoading && tabId) {
+    return (
+      <div
+        className={`${
+          cursorDirection
+            ? `cursor-${cursorDirection}`
+            : grabbedElement
+            ? "cursor-move"
+            : "cursor-default"
+        } bg-[#dadada] w-screen h-screen flex items-center justify-center`}
+        style={{
+          backgroundImage:
+            "radial-gradient(circle, #cacaca 2px, transparent 1px)",
+          backgroundSize: "20px 20px",
+        }}
+      >
+        <h1 className="text-6xl ">Loading...</h1>
+      </div>
+    );
+  }
+  if (!isTabDataLoading && !isValidTab && tabId) {
+    return (
+      <div
+        className={`${
+          cursorDirection
+            ? `cursor-${cursorDirection}`
+            : grabbedElement
+            ? "cursor-move"
+            : "cursor-default"
+        } bg-[#dadada] w-screen h-screen flex items-center justify-center flex-col gap-4`}
+        style={{
+          backgroundImage:
+            "radial-gradient(circle, #cacaca 2px, transparent 1px)",
+          backgroundSize: "20px 20px",
+        }}
+      >
+        <h1 className="text-6xl">INVALID TAB ID.</h1>
+        <span className="text-3xl">Redirecting to the home page...</span>
+      </div>
+    );
+  }
   return (
     <div
       className={`${
