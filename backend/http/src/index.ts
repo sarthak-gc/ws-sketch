@@ -3,11 +3,11 @@ import routes from "./routes";
 import { cors } from "hono/cors";
 
 const app = new Hono();
-const frontendUrl = "https://ws-sketch.vercel.app";
+const origin = ["https://ws-sketch.vercel.app", "http://localhost:5173"];
 
 app.use(
   cors({
-    origin: frontendUrl || "http://localhost:5173",
+    origin,
     credentials: true,
   })
 );
