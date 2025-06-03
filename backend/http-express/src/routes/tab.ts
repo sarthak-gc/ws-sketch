@@ -1,4 +1,4 @@
-import { Hono } from "hono";
+import express from "express";
 import {
   changeTabEditMode,
   changeTabName,
@@ -11,7 +11,7 @@ import {
   removeTab,
 } from "../controllers/tab.controllers";
 import { authMiddleware } from "../middlewares/authMiddleware";
-const tabRoutes = new Hono();
+const tabRoutes = express.Router();
 
 tabRoutes.use(authMiddleware);
 tabRoutes.get("/all", getAllTabs);

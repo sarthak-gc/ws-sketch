@@ -7,8 +7,3 @@ declare global {
     }
   }
 }
-declare module "hono" {
-  interface HonoRequest {
-    userId: string;
-  }
-}

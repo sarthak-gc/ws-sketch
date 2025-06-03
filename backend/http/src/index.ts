@@ -1,18 +1,16 @@
-import express from "express";
+import { Hono } from "hono";
 import routes from "./routes";
-import cors from "cors";
-import cookieParser from "cookie-parser";
+import { cors } from "hono/cors";
 
-const app = express();
+const app = new Hono();
+const frontendUrl = "https://ws-sketch.vercel.app";
 
-app.use(cookieParser());
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    origin: frontendUrl || "http://localhost:5173",
     credentials: true,
   })
 );
-app.use(express.json());
-app.use("/", routes);
-const port = process.env.PORT || 3000;
-app.listen(port);
+
+app.route("/", routes);
+export default app;

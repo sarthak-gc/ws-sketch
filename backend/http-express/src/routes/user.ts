@@ -1,6 +1,6 @@
-import { Hono } from "hono";
+import express from "express";
 import { login, logout, register } from "../controllers/user.controllers";
-const userRoutes = new Hono();
+const userRoutes = express.Router();
 
 userRoutes.post("/register", register);
 userRoutes.post("/login", login);

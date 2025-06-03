@@ -1,38 +1,37 @@
-import { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { PrismaClient } from "@prisma/client";
-import cookieParser from "cookie-parser";
+
 import { generateColor } from "../utils/hexcode";
+import { Context } from "hono";
+import { setCookie } from "hono/cookie";
+import { getPrisma } from "../utils/getPrisma";
 
-const prisma = new PrismaClient();
-
-export const register = async (req: Request, res: Response) => {
+export const register = async (c: Context) => {
   try {
-    const { username, password, email } = req.body;
+    const { username, password, email } = await c.req.json();
     const hashedPassword = await bcrypt.hash(password, 10);
-
+    const prisma = getPrisma(c);
     const userExists = await prisma.user.findFirst({
       where: {
-        OR: [{ username }, { email }],
+        OR: [{ username: username }, { email: email }],
       },
     });
 
     if (userExists) {
-      res.status(500).json({
+      c.status(500);
+      return c.json({
         status: "error",
         message:
           "User with that username or email already exists, try different username or email",
       });
-      return;
     }
-    const hexCode = generateColor(username);
+    const hexCode = generateColor(username as string);
     const user = await prisma.user.create({
       data: {
         hexCode,
-        username,
+        username: username,
         password: hashedPassword,
-        email,
+        email: email,
       },
     });
 
@@ -40,46 +39,59 @@ export const register = async (req: Request, res: Response) => {
       { username, userId: user.userId },
       (process.env.JWT_SECRET as string) || "SECRET"
     );
-    res.cookie("token", token, { httpOnly: true });
-    res.json({
+
+    setCookie(c, "token", token, {
+      httpOnly: true,
+    });
+    return c.json({
       message: "User created successfully",
       userId: user.userId,
       username,
     });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Error creating user", error });
+    c.status(500);
+    return c.json({ message: "Error creating user" });
   }
 };
 
-export const login = async (req: Request, res: Response) => {
+export const login = async (c: Context) => {
   try {
-    const { username, password } = req.body;
-    const user = await prisma.user.findUnique({ where: { username } });
+    const { username, password } = await c.req.json();
+    const prisma = getPrisma(c);
+
+    const user = await prisma.user.findUnique({
+      where: { username: username },
+    });
     if (!user) {
-      res.status(404).json({ message: "User not found" });
-      return;
+      c.status(404);
+      return c.json({ message: "User not found" });
     }
     if (await bcrypt.compare(password, user.password)) {
       const token = jwt.sign(
         { username, userId: user.userId },
         (process.env.JWT_SECRET as string) || "SECRET"
       );
-      res.cookie("token", token, { httpOnly: true });
-      res.json({ username, userId: user.userId });
-      return;
+
+      setCookie(c, "token", token, {
+        httpOnly: true,
+      });
+
+      return c.json({ username, userId: user.userId });
     }
-    res.status(401).json({ message: "Invalid password" });
+    c.status(401);
+    return c.json({ message: "Invalid password" });
   } catch (error) {
-    res.status(500).json({ message: "Error logging in", error });
+    c.status(500);
+    return c.json({ message: "Error logging in" });
   }
 };
 
-export const logout = async (req: Request, res: Response) => {
+export const logout = async (c: Context) => {
   try {
-    res.clearCookie("token");
-    res.json({ message: "User logged out successfully" });
+    setCookie(c, "token", "");
+    return c.json({ message: "User logged out successfully" });
   } catch (error) {
-    res.status(500).json({ message: "Error logging out", error });
+    c.status(500);
+    return c.json({ message: "Error logging out" });
   }
 };

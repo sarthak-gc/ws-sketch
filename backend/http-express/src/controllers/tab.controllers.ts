@@ -1,11 +1,10 @@
-import { Context } from "hono";
-import { getPrisma } from "../utils/getPrisma";
+import { Request, Response } from "express";
+import { PrismaClient } from "@prisma/client";
+const prisma = new PrismaClient();
 
-export const getAllTabs = async (c: Context) => {
-  console.log("here");
+export const getAllTabs = async (req: Request, res: Response) => {
   try {
-    const userId = c.req.userId;
-    const prisma = getPrisma(c);
+    const userId = req.userId;
     const tabs = await prisma.tabs.findMany({
       where: {
         userId,
@@ -20,146 +19,137 @@ export const getAllTabs = async (c: Context) => {
       },
     });
 
-    return c.json({
+    res.json({
       status: "success",
       data: {
         tabs,
       },
     });
   } catch (error) {
-    console.log("error here");
-    c.status(500);
-    return c.json({
-      status: "error",
-      message: "An unexpected error occurred LOL",
-    });
+    res
+      .status(500)
+      .json({ status: "error", message: "An unexpected error occurred" });
   }
 };
 
-export const createTab = async (c: Context) => {
+export const createTab = async (req: Request, res: Response) => {
   try {
-    const userId = c.req.userId;
-    const prisma = getPrisma(c);
+    const userId = req.userId;
     const tab = await prisma.tabs.create({ data: { userId } });
-    return c.json({
+    res.json({
       status: "success",
       tab,
     });
   } catch (error) {
-    c.status(500);
-    return c.json({ status: "error", message: "An unexpected error occurred" });
+    res
+      .status(500)
+      .json({ status: "error", message: "An unexpected error occurred" });
   }
 };
 
-export const removeTab = async (c: Context) => {
+export const removeTab = async (req: Request, res: Response) => {
   try {
-    const tabId = c.req.param().tabId;
-    const userId = c.req.userId;
-    const prisma = getPrisma(c);
+    const tabId = req.params.tabId;
+    const userId = req.userId;
+
     const tab = await prisma.tabs.findUnique({ where: { tabId } });
 
     if (!tab || tab.userId !== userId) {
-      c.status(403);
-      return c.json({ status: "error", message: "Unauthorized" });
+      res.status(403).json({ status: "error", message: "Unauthorized" });
+      return;
     }
     await prisma.tabs.delete({ where: { tabId } });
-    return c.json({
+    res.json({
       status: "success",
     });
   } catch (error) {
-    c.status(500);
-    return c.json({
-      status: "error",
-      message: "An unexpected error occurred",
-    });
+    res
+      .status(500)
+      .json({ status: "error", message: "An unexpected error occurred" });
   }
 };
 
-export const changeTabName = async (c: Context) => {
+export const changeTabName = async (req: Request, res: Response) => {
   try {
-    const userId = c.req.userId;
-    const tabId = c.req.param().tabId;
-    const { tabName } = await c.req.json();
-    const prisma = getPrisma(c);
+    const userId = req.userId;
+    const tabId = req.params.tabId;
+    const { tabName } = req.body;
     const updatedTab = await prisma.tabs.updateMany({
       where: { tabId, userId },
       data: {
-        tabName: tabName as string,
+        tabName,
       },
     });
     if (updatedTab.count === 0) {
-      c.status(404);
-      return c.json({ status: "error", message: "Tab not found" });
+      res.status(404).json({ status: "error", message: "Tab not found" });
+      return;
     }
 
-    return c.json({
+    res.json({
       status: "success",
     });
   } catch (error) {
-    c.status(500);
-    return c.json({
-      status: "error",
-      message: "An unexpected error occurred",
-    });
+    res
+      .status(500)
+      .json({ status: "error", message: "An unexpected error occurred" });
   }
 };
 
-export const changeTabEditMode = async (c: Context) => {
+export const changeTabEditMode = async (req: Request, res: Response) => {
   try {
-    const userId = c.req.userId;
-    const tabId = c.req.param().tabId;
-    const { isEditable } = await c.req.json();
-    const prisma = getPrisma(c);
+    const userId = req.userId;
+    const tabId = req.params.tabId;
+    const { isEditable } = req.body;
     const updatedTab = await prisma.tabs.updateMany({
       where: { tabId, userId },
       data: {
-        isEditable: Boolean(isEditable),
+        isEditable,
       },
     });
     if (updatedTab.count === 0) {
-      c.status(404);
-      return c.json({ status: "error", message: "Tab not found" });
+      res.status(404).json({ status: "error", message: "Tab not found" });
+      return;
     }
-    return c.json({
+    res.json({
       status: "success",
     });
   } catch (error) {
-    c.status(500);
-    return c.json({ status: "error", message: "An unexpected error occurred" });
+    res
+      .status(500)
+      .json({ status: "error", message: "An unexpected error occurred" });
   }
 };
 
-export const changeTabVisibility = async (c: Context) => {
+export const changeTabVisibility = async (req: Request, res: Response) => {
   try {
-    const userId = c.req.userId;
-    const tabId = c.req.param().tabId;
-    const { isPrivate } = await c.req.json();
-    const prisma = getPrisma(c);
+    const userId = req.userId;
+    const tabId = req.params.tabId;
+    const { isPrivate } = req.body;
     const updatedTab = await prisma.tabs.updateMany({
       where: { tabId, userId },
       data: {
-        isPrivate: Boolean(isPrivate),
+        isPrivate,
       },
     });
     if (updatedTab.count === 0) {
-      c.status(404);
-      return c.json({ status: "error", message: "Tab not found" });
+      res.status(404).json({ status: "error", message: "Tab not found" });
+      return;
     }
-
-    return c.json({
+    res.json({
       status: "success",
     });
   } catch (error) {
-    c.status(500);
-    return c.json({ status: "error", message: "An unexpected error occurred" });
+    res
+      .status(500)
+      .json({ status: "error", message: "An unexpected error occurred" });
   }
 };
 
-export const generateAccessCode = async (c: Context) => {
+export const generateAccessCode = async (req: Request, res: Response) => {
   try {
-    const userId = c.req.userId;
-    const tabId = c.req.param().tabId;
-    const { duration } = await c.req.json();
+    const userId = req.userId;
+    const tabId = req.params.tabId;
+    const { duration } = req.body;
     const accessCode = Math.random().toString(36).substring(2, 8);
     const expirationTime = new Date();
 
@@ -173,7 +163,7 @@ export const generateAccessCode = async (c: Context) => {
       default:
         expirationTime.setMinutes(expirationTime.getMinutes() + 10);
     }
-    const prisma = getPrisma(c);
+
     const updatedTab = await prisma.tabs.updateMany({
       where: { tabId, userId },
       data: {
@@ -183,10 +173,10 @@ export const generateAccessCode = async (c: Context) => {
     });
 
     if (updatedTab.count === 0) {
-      c.status(404);
-      return c.json({ status: "error", message: "Tab not found" });
+      res.status(404).json({ status: "error", message: "Tab not found" });
+      return;
     }
-    return c.json({
+    res.json({
       status: "success",
       data: {
         accessCode,
@@ -194,16 +184,16 @@ export const generateAccessCode = async (c: Context) => {
       },
     });
   } catch (error) {
-    c.status(500);
-    return c.json({ status: "error", message: "An unexpected error occurred" });
+    res
+      .status(500)
+      .json({ status: "error", message: "An unexpected error occurred" });
   }
 };
 
-export const getTabDetail = async (c: Context) => {
+export const getTabDetail = async (req: Request, res: Response) => {
   try {
-    const userId = c.req.userId;
-    const { tabId } = c.req.param();
-    const prisma = getPrisma(c);
+    const userId = req.userId;
+    const { tabId } = req.params;
     const tab = await prisma.tabs.findUnique({
       where: { tabId },
       include: {
@@ -211,8 +201,8 @@ export const getTabDetail = async (c: Context) => {
       },
     });
     if (!tab) {
-      c.status(404);
-      return c.json({ message: "Tab not found" });
+      res.status(404).send({ message: "Tab not found" });
+      return;
     }
 
     let locked: boolean = true;
@@ -227,30 +217,31 @@ export const getTabDetail = async (c: Context) => {
     }
 
     if (locked) {
-      return c.json({
+      res.json({
         status: "Tab is personal",
         data: {
           tab,
         },
       });
+      return;
     }
 
-    return c.json({
+    res.json({
       status: "success",
       data: {
         tab,
       },
     });
   } catch (error) {
-    c.status(500);
-    return c.json({ status: "error", message: "An unexpected error occurred" });
+    res
+      .status(500)
+      .json({ status: "error", message: "An unexpected error occurred" });
   }
 };
 
-export const joinTab = async (c: Context) => {
-  const { accessCode } = c.req.param();
-  const userId = c.req.userId;
-  const prisma = getPrisma(c);
+export const joinTab = async (req: Request, res: Response) => {
+  const { accessCode } = req.params;
+  const userId = req.userId;
   const tabs = await prisma.tabs.findMany({
     where: {
       accessCode,
@@ -270,14 +261,16 @@ export const joinTab = async (c: Context) => {
   });
 
   if (tabs.length == 0) {
-    return c.json({
+    res.json({
       message: "Invalid Access Code",
     });
+    return;
   }
   if (tabs.length > 1) {
-    return c.json({
+    res.json({
       message: "Access Code Conflict, Ask them to generate a new code",
     });
+    return;
   }
 
   const tab = tabs[0];
@@ -287,9 +280,10 @@ export const joinTab = async (c: Context) => {
   alreadyJoined = alreadyJoined || tab.userId == userId;
 
   if (alreadyJoined) {
-    return c.json({
+    res.json({
       message: "Already part of this tab",
     });
+    return;
   }
   const tabDets = await prisma.tabs.update({
     where: {
@@ -314,8 +308,9 @@ export const joinTab = async (c: Context) => {
     },
   });
 
-  return c.json({
+  res.json({
     message: "Room joined",
     tabDets,
   });
+  return;
 };

@@ -1,9 +1,9 @@
-import express from "express";
 import userRoutes from "./user";
 import tabRoutes from "./tab";
+import { Hono } from "hono";
 
-const routes = express.Router();
+const routes = new Hono();
 
-routes.use("/user", userRoutes);
-routes.use("/tab", tabRoutes);
+routes.route("/user", userRoutes);
+routes.route("/tab", tabRoutes);
 export default routes;

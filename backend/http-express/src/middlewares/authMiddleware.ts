@@ -1,18 +1,22 @@
-import { Context, Next } from "hono";
-import { getCookie } from "hono/cookie";
-
+import { PrismaClient } from "@prisma/client";
+import { NextFunction, Request, Response } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import { getPrisma } from "../utils/getPrisma";
 
-export const authMiddleware = async (c: Context, next: Next) => {
-  const token = getCookie(c, "token");
+const prisma = new PrismaClient();
+
+export const authMiddleware = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const token = req.cookies["token"];
 
   if (!token) {
-    c.status(403);
-    return c.json({
+    res.status(403).json({
       status: "error",
       message: "Authorization failed, login to continue",
     });
+    return;
   }
 
   try {
@@ -21,25 +25,24 @@ export const authMiddleware = async (c: Context, next: Next) => {
       (process.env.JWT_SECRET as string) || "SECRET"
     ) as JwtPayload & { userId: string };
 
-    const prisma = getPrisma(c);
     const user = await prisma.user.findFirst({
       where: {
         userId: decoded.userId,
       },
     });
-
     if (!user) {
-      c.status(403);
-      return c.json({
+      res.status(403).json({
         status: "error",
         message: "User not found, Try logging in again",
       });
+      return;
     }
-    c.req.userId = decoded.userId;
+    req.userId = decoded.userId;
 
-    return await next();
+    next();
   } catch (err) {
-    c.status(500);
-    return c.json({ status: "error", message: "An unexpected error occurred" });
+    res
+      .status(500)
+      .json({ status: "error", message: "An unexpected error occurred" });
   }
 };

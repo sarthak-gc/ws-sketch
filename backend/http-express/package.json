@@ -1,28 +1,25 @@
 {
   "name": "http-server",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
   "scripts": {
-    "dev": "wrangler dev",
-    "deploy": "wrangler deploy --minify",
-    "cf-typegen": "wrangler types --env-interface CloudflareBindings"
+    "dev": "tsc -b && node dist/index.js"
   },
   "dependencies": {
     "@prisma/client": "^6.8.2",
-    "@prisma/extension-accelerate": "^2.0.1",
     "@types/cookie-parser": "^1.4.8",
     "@types/cors": "^2.8.18",
     "@types/crypto-js": "^4.2.2",
+    "@types/express": "^5.0.2",
     "@types/jsonwebtoken": "^9.0.9",
     "@types/uuid": "^10.0.0",
     "bcryptjs": "^3.0.2",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "crypto-js": "^4.2.0",
-    "hono": "^4.7.11",
+    "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
-    "prisma": "^6.8.2",
-    "uuid": "^11.1.0"
-  },
-  "devDependencies": {
-    "wrangler": "^4.4.0"
+    "prisma": "^6.8.2"
   }
 }
