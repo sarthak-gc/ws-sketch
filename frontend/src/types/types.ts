@@ -6,7 +6,7 @@ export type Element = {
   Y1: number;
   X2: number;
   Y2: number;
-  color?: string;
+  color: string;
   id: string;
 };
 export type Collaborator = {

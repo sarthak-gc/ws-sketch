@@ -45,6 +45,7 @@ export const register = async (req: Request, res: Response) => {
       message: "User created successfully",
       userId: user.userId,
       username,
+      hexCode,
     });
   } catch (error) {
     console.log(error);
@@ -66,7 +67,7 @@ export const login = async (req: Request, res: Response) => {
         (process.env.JWT_SECRET as string) || "SECRET"
       );
       res.cookie("token", token, { httpOnly: true });
-      res.json({ username, userId: user.userId });
+      res.json({ username, userId: user.userId, hexCode: user.hexCode });
       return;
     }
     res.status(401).json({ message: "Invalid password" });

@@ -47,6 +47,7 @@ export const register = async (c: Context) => {
       message: "User created successfully",
       userId: user.userId,
       username,
+      hexCode,
     });
   } catch (error) {
     c.status(500);
@@ -76,7 +77,7 @@ export const login = async (c: Context) => {
         httpOnly: true,
       });
 
-      return c.json({ username, userId: user.userId });
+      return c.json({ username, userId: user.userId, hexCode: user.hexCode });
     }
     c.status(401);
     return c.json({ message: "Invalid password" });
@@ -96,25 +97,25 @@ export const logout = async (c: Context) => {
   }
 };
 
-// export const seedUser = async (c: Context) => {
-//   const users = [];
-//   for (let i = 1; i < 27; i++) {
-//     const username = String.fromCharCode(96 + i);
-//     const hexCode = generateColor(username);
-//     const email = username + "@" + username + "." + username;
-//     const hashedPassword = await bcrypt.hash(username, 10);
-//     users.push({
-//       username,
-//       hexCode,
-//       email,
-//       password: hashedPassword,
-//     });
-//   }
-//   const prisma = getPrisma(c);
-//   await prisma.user.createMany({
-//     data: users,
-//   });
-//   return c.json({
-//     msg: "Seeded",
-//   });
-// };
+export const seedUser = async (c: Context) => {
+  const users = [];
+  for (let i = 1; i < 27; i++) {
+    const username = String.fromCharCode(96 + i);
+    const hexCode = generateColor(username);
+    const email = username + "@" + username + "." + username;
+    const hashedPassword = await bcrypt.hash(username, 10);
+    users.push({
+      username,
+      hexCode,
+      email,
+      password: hashedPassword,
+    });
+  }
+  const prisma = getPrisma(c);
+  await prisma.user.createMany({
+    data: users,
+  });
+  return c.json({
+    msg: "Seeded",
+  });
+};

@@ -52,15 +52,15 @@ const WorkSpace = () => {
   const userId = useUserInfoStore().user?.userId;
   const activeTabId = useTabStore().activeTabId;
   const tabId = useParams().tabId;
+  const hexCode = useUserInfoStore.getState().user?.hexCode || "red";
+
   useEffect(() => {
-    if (tabId && tabId !== activeTabId) {
-      const setActiveTabId = useTabStore.getState().setActiveTabId;
-      if (tabId && tabId !== activeTabId && isValidTab) {
-        setActiveTabId(tabId);
-      }
-      if (!tabId || !isValidTab) {
-        setActiveTabId(null);
-      }
+    const setActiveTabId = useTabStore.getState().setActiveTabId;
+    if (tabId && tabId !== activeTabId && isValidTab) {
+      setActiveTabId(tabId);
+    }
+    if (!tabId || !isValidTab) {
+      setActiveTabId(null);
     }
   }, [tabId, activeTabId, isValidTab]);
 
@@ -174,14 +174,16 @@ const WorkSpace = () => {
         return;
       }
       if (e.key == "Escape") {
-        const updatedElements = elements.map((e) => {
-          return { ...e, color: "black" };
-        });
-        setElements(updatedElements);
+        //? related to line number 227
+        // const updatedElements = elements.map((e) => {
+        //   return { ...e, color: e.color };
+        // });
+        // setElements(updatedElements);
         setGrabbedElement(null);
       }
     },
-    [handleDelete, grabbedElement, elements, clearEverything]
+    // [handleDelete, grabbedElement, elements, clearEverything]
+    [handleDelete, grabbedElement, clearEverything]
   );
 
   useEffect(() => {
@@ -224,6 +226,7 @@ const WorkSpace = () => {
         X2: e.clientX,
         Y2: e.clientY,
         id,
+        color: hexCode,
       });
       return;
     }
@@ -271,12 +274,13 @@ const WorkSpace = () => {
       const isElemThere = elementThere(elements[i], e.clientX, e.clientY);
 
       if (isElemThere) {
-        const updatedElements = elements.map((el) =>
-          el === elements[i]
-            ? { ...el, color: "blue" }
-            : { ...el, color: "black" }
-        );
-        setElements(updatedElements);
+        // ! turning blue, might have to copy the highlighted element and show that instead
+        // const updatedElements = elements.map((el) =>
+        //   el === elements[i]
+        //     ? { ...el, color: "blue" }
+        //     : { ...el, color: hexCode }
+        // );
+        // setElements(updatedElements);
         setResizeElement(null);
         setCursorDirection(null);
         if (grabbedElement?.id != elements[i].id) {
@@ -288,11 +292,6 @@ const WorkSpace = () => {
         setGrabbedElement(null);
         setResizeElement(null);
         setCursorDirection(null);
-        const updatedElements = elements.map((e) => {
-          return { ...e, color: "black" };
-        });
-
-        setElements(updatedElements);
       }
     }
   };
@@ -350,7 +349,7 @@ const WorkSpace = () => {
 
     if (action == "Grabbing" && !grabbedElement) {
       const updatedElements = elements.map((el) => {
-        return { ...el, color: "black" };
+        return { ...el, color: el.color };
       });
       setElements(updatedElements);
       setGrabbedElement(null);
@@ -490,7 +489,10 @@ const WorkSpace = () => {
       )}
       {showTutorial && !isLoading && <Tutorial showTutorial={showTutorial} />}
       {isModalOpen && <KeyboardShortcutsModal onClose={toggleModal} />}
-      {isLoggedIn && <ControlPanel />}
+      {isLoggedIn && (
+        // <ControlPanel isLocked={isLocked} setCollaborators={setCollaborators} />
+        <ControlPanel isLocked={isLocked} />
+      )}
       {isLoggedIn && <Sidebar />}
     </div>
   );

@@ -23,10 +23,11 @@ const LoginPage = () => {
       navigate("/");
       const { userId } = response.data;
       const name = response.data.username;
-
+      const hexCode: string = response.data.hexCode;
       useUserInfoStore.getState().setUser({
         username: name,
         userId: userId,
+        hexCode: hexCode.slice(0, 7),
       });
     } catch (err) {
       console.error(err);

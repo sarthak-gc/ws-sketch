@@ -10,6 +10,7 @@ interface Element {
   X2: number;
   Y2: number;
   id: string;
+  color: string;
 }
 
 interface WebSocketWithId extends WebSocket {
@@ -49,6 +50,9 @@ wss.on("connection", (socket: WebSocketWithId) => {
         currentDrawingElement.set(username, value);
       }
 
+      if (!elements.has(msg.tabId)) {
+        elements.set(msg.tabId, new Map());
+      }
       elements.get(msg.tabId)?.set(value.id, value);
 
       let serializedCurrentDrawingElement = Object.fromEntries(

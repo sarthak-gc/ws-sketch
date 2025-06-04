@@ -8,8 +8,15 @@ import { useState } from "react";
 import { useTabStore } from "../store/tabStore";
 import AccessCodeModal from "./AccessCodeModal";
 import JoinTabModal from "./JoinTabModal";
+// import type { Collaborator } from "../types/types";
 
-const ControlPanel = () => {
+const ControlPanel = ({
+  isLocked,
+}: // setCollaborators,
+{
+  isLocked: boolean;
+  // setCollaborators: React.Dispatch<React.SetStateAction<Collaborator[]>>;
+}) => {
   const navigate = useNavigate();
   const tabId = useTabStore().activeTabId;
   const [isOpen, setIsOpen] = useState(false);
@@ -52,7 +59,7 @@ const ControlPanel = () => {
           >
             <Collab />
           </button>
-          {tabId && (
+          {tabId && !isLocked && (
             <button
               onClick={generateAccessCode}
               className=" bg-black/40 text-white font-bold p-3 rounded-full cursor-pointer hover:bg-black"
@@ -68,6 +75,7 @@ const ControlPanel = () => {
               localStorage.clear();
               localStorage.setItem("show_tutorial", "false");
               navigate("/login");
+              sessionStorage.clear();
             }}
             className=" bg-black/40 text-white font-bold p-3 rounded-full cursor-pointer hover:bg-black"
           >
@@ -107,6 +115,7 @@ const ControlPanel = () => {
         expiresAt={accessCodeData.expiresAt}
       />
       <JoinTabModal
+        // setCollaborators={setCollaborators}
         isOpen={isJoinTabModalOpen}
         onClose={() => setIsJoinModalOpen(false)}
       />

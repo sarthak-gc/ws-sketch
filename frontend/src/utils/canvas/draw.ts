@@ -11,6 +11,7 @@ export const getShape = (element: Element) => {
     roughness: 1.5,
     strokeWidth: 1.2,
     seed: 1,
+    stroke: element.color,
   };
 
   const { X1, Y1, X2, Y2 } = element;
@@ -20,12 +21,10 @@ export const getShape = (element: Element) => {
   if (element.shape == "Line")
     return generator.line(X1, Y1, X2, Y2, {
       ...options,
-      stroke: element.color ? element.color : "black",
     });
   if (element.shape == "Rectangle")
     return generator.rectangle(X1, Y1, width, height, {
       ...options,
-      stroke: element.color ? element.color : "black",
     });
 
   if (element.shape == "Circle") {
@@ -34,7 +33,6 @@ export const getShape = (element: Element) => {
 
     return generator.ellipse(centerX, centerY, width, height, {
       ...options,
-      stroke: element.color ? element.color : "black",
     });
   }
 
@@ -42,7 +40,6 @@ export const getShape = (element: Element) => {
     // tauko kasari?
     const line = generator.line(X1, Y1, X2, Y2, {
       ...options,
-      stroke: element.color ? element.color : "black",
     });
 
     // let tilted1;
@@ -67,7 +64,6 @@ export const getShape = (element: Element) => {
 
     return generator.polygon(points, {
       ...options,
-      stroke: element.color ? element.color : "black",
     });
   }
 

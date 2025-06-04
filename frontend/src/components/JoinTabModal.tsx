@@ -1,16 +1,25 @@
 import { useState } from "react";
 import CopyClipboard from "./Svg/CopyClipboard";
 import { AXIOS_TAB } from "../utils/axios/axios";
+import { useNavigate } from "react-router-dom";
+import { useUserInfoStore } from "../store/userInfoStore";
+// import type { Collaborator } from "../types/types";
 
 interface JoinTabModalI {
   isOpen: boolean;
   onClose: () => void;
   initialCode?: string;
+  // setCollaborators: React.Dispatch<React.SetStateAction<Collaborator[]>>;
 }
 
-const JoinTabModal = ({ isOpen, onClose, initialCode = "" }: JoinTabModalI) => {
+const JoinTabModal = ({
+  isOpen,
+  onClose,
+  initialCode = "",
+}: // setCollaborators,
+JoinTabModalI) => {
   const [joinCode, setJoinCode] = useState<string>(initialCode);
-
+  const navigate = useNavigate();
   if (!isOpen) return null;
 
   const handleJoinClick = async () => {
@@ -21,8 +30,24 @@ const JoinTabModal = ({ isOpen, onClose, initialCode = "" }: JoinTabModalI) => {
 
     if (joinCode.trim().length === 6) {
       const response = await AXIOS_TAB.post(`/join/${joinCode.trim()}`);
-      console.log(response.data.tabDets);
 
+      const userId = useUserInfoStore.getState().user?.userId;
+      const username = useUserInfoStore.getState().user?.username;
+      if (userId && username) {
+        // setCollaborators((prev) => {
+        //   return [
+        //     ...prev,
+        //     {
+        //       userId,
+        //       username,
+        //       hexCode: "",
+        //       isOnline: true,
+        //     },
+        //   ];
+        // });
+      }
+
+      navigate(`/${response.data.tabDets.tabId}`);
       const a = {
         collaborators: [
           {
