@@ -95,3 +95,26 @@ export const logout = async (c: Context) => {
     return c.json({ message: "Error logging out" });
   }
 };
+
+// export const seedUser = async (c: Context) => {
+//   const users = [];
+//   for (let i = 1; i < 27; i++) {
+//     const username = String.fromCharCode(96 + i);
+//     const hexCode = generateColor(username);
+//     const email = username + "@" + username + "." + username;
+//     const hashedPassword = await bcrypt.hash(username, 10);
+//     users.push({
+//       username,
+//       hexCode,
+//       email,
+//       password: hashedPassword,
+//     });
+//   }
+//   const prisma = getPrisma(c);
+//   await prisma.user.createMany({
+//     data: users,
+//   });
+//   return c.json({
+//     msg: "Seeded",
+//   });
+// };
