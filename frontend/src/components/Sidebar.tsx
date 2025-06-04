@@ -31,14 +31,19 @@ const Sidebar = () => {
         createdAt,
       });
 
-      useAppStore.getState().setTabs([
-        {
-          tabId,
-          tabName,
-          isPrivate,
-          createdAt,
-        },
-      ]);
+      const alreadyThere = useAppStore
+        .getState()
+        .tabs.some((tab) => tab.tabId != tabId);
+      if (!alreadyThere) {
+        useAppStore.getState().setTabs([
+          {
+            tabId,
+            tabName,
+            isPrivate,
+            createdAt,
+          },
+        ]);
+      }
     } catch (err) {
       console.log(err);
     }

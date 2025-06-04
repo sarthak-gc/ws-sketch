@@ -48,14 +48,21 @@ const WorkSpace = () => {
   const [isValidTab, setIsValidTab] = useState<boolean>(false);
   const [isTabDataLoading, setIsTabDataLoading] = useState<boolean>(true);
   const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
+  const [isLocked, setIsLocked] = useState<boolean>(false);
+  const userId = useUserInfoStore().user?.userId;
   const activeTabId = useTabStore().activeTabId;
   const tabId = useParams().tabId;
   useEffect(() => {
     if (tabId && tabId !== activeTabId) {
       const setActiveTabId = useTabStore.getState().setActiveTabId;
-      setActiveTabId(tabId);
+      if (tabId && tabId !== activeTabId && isValidTab) {
+        setActiveTabId(tabId);
+      }
+      if (!tabId || !isValidTab) {
+        setActiveTabId(null);
+      }
     }
-  }, [tabId, activeTabId]);
+  }, [tabId, activeTabId, isValidTab]);
 
   const isMobile = useDetectMobile();
   useBeforeInstallPrompt();
@@ -63,7 +70,8 @@ const WorkSpace = () => {
     setElements,
     collaborators,
     tabId,
-    isValidTab
+    isValidTab,
+    isLocked
   );
   useDebouncedWs(socketInstance, elements);
   useSendCurrentDrawingElement(socketInstance, element);
@@ -75,13 +83,19 @@ const WorkSpace = () => {
       try {
         const response = await AXIOS_TAB.get(`/${tabId}/detail`);
         setIsValidTab(true);
-        setCollaborators(response.data.data.tab.Collaborators);
+        const collaborators: Collaborator[] =
+          response.data.data.tab.Collaborators;
+        setCollaborators(collaborators);
+        setIsLocked(response.data.data.locked);
       } catch (err) {
-        if (err instanceof AxiosError)
+        if (err instanceof AxiosError) {
           console.error(err.response?.data.message);
-        await new Promise((resolve) => setTimeout(resolve, 5000));
+          setIsTabDataLoading(false);
+          setIsValidTab(false);
+        }
+        await new Promise((resolve) => setTimeout(resolve, 1000));
         setIsTabDataLoading(false);
-        setIsValidTab(true);
+        setIsValidTab(false);
         navigate("/");
       } finally {
         if (!isValidTab) {
@@ -89,9 +103,9 @@ const WorkSpace = () => {
         }
       }
     };
-    if (tabId) getCollaborators();
+    if (tabId && isLoggedIn) getCollaborators();
     return () => {};
-  }, [navigate, tabId, isValidTab]);
+  }, [navigate, tabId, isValidTab, isLoggedIn, userId]);
 
   const createElement = (e: Element) => {
     setElement(e);
@@ -358,7 +372,7 @@ const WorkSpace = () => {
     );
   }
 
-  if (isTabDataLoading && tabId) {
+  if (isTabDataLoading && tabId && isLoggedIn) {
     return (
       <div
         className={`${
@@ -378,7 +392,7 @@ const WorkSpace = () => {
       </div>
     );
   }
-  if (!isTabDataLoading && !isValidTab && tabId) {
+  if (!isTabDataLoading && !isValidTab && tabId && isLoggedIn) {
     return (
       <div
         className={`${
@@ -427,7 +441,7 @@ const WorkSpace = () => {
         </nav>
       ) : null}
 
-      {tabId && !isLoggedIn ? (
+      {(tabId && !isLoggedIn) || isLocked ? (
         <div className="relative">
           <canvas
             ref={canvasRef}
@@ -435,23 +449,34 @@ const WorkSpace = () => {
             height={window.innerHeight}
             className="filter blur-[8px]"
           ></canvas>
-          <div className="absolute w-full h-screen top-0 flex items-center justify-center flex-col gap-10">
-            <h1 className="text-6xl text-gray-500">Login to edit this tab</h1>
-            <div className={`flex gap-4 ${isLoggedIn && "hidden"}`}>
-              <Link
-                to="/login"
-                className="hover:bg-[#dadada] px-4  p-2 cursor-pointer rounded-md bg-black text-white hover:text-black"
-              >
-                Login
-              </Link>
-              <Link
-                to="/register"
-                className="hover:bg-[#dadada]  p-2 cursor-pointer rounded-sm bg-black text-white hover:text-black"
-              >
-                Register
-              </Link>
+          {!isLoggedIn ? (
+            <div className="absolute w-full h-screen top-0 flex items-center justify-center flex-col gap-10">
+              <h1 className="text-6xl text-gray-500">Login to edit this tab</h1>
+              <div className={`flex gap-4 ${isLoggedIn && "hidden"}`}>
+                <Link
+                  to="/login"
+                  className="hover:bg-[#dadada] px-4  p-2 cursor-pointer rounded-md bg-black text-white hover:text-black"
+                >
+                  Login
+                </Link>
+                <Link
+                  to="/register"
+                  className="hover:bg-[#dadada]  p-2 cursor-pointer rounded-sm bg-black text-white hover:text-black"
+                >
+                  Register
+                </Link>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="absolute w-full h-screen top-0 flex items-center justify-center flex-col gap-10">
+              <h1 className="text-6xl text-gray-500">
+                Join the group to edit this tab
+              </h1>
+              <div className={`flex gap-4 ${isLoggedIn && "hidden"}`}>
+                You can ask the members for a joining code
+              </div>
+            </div>
+          )}
         </div>
       ) : (
         <canvas
@@ -464,7 +489,6 @@ const WorkSpace = () => {
         ></canvas>
       )}
       {showTutorial && !isLoading && <Tutorial showTutorial={showTutorial} />}
-
       {isModalOpen && <KeyboardShortcutsModal onClose={toggleModal} />}
       {isLoggedIn && <ControlPanel />}
       {isLoggedIn && <Sidebar />}

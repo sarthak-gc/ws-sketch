@@ -1,17 +1,42 @@
 import { useNavigate } from "react-router-dom";
 import { useUserInfoStore } from "../store/userInfoStore";
-import { AXIOS_USER } from "../utils/axios/axios";
+import { AXIOS_TAB, AXIOS_USER } from "../utils/axios/axios";
 import Logout from "./Svg/Logout";
 import Collab from "./Svg/Collab";
 import JoinLink from "./Svg/JoinLink";
 import { useState } from "react";
+import { useTabStore } from "../store/tabStore";
+import AccessCodeModal from "./AccessCodeModal";
+import JoinTabModal from "./JoinTabModal";
 
 const ControlPanel = () => {
   const navigate = useNavigate();
-
+  const tabId = useTabStore().activeTabId;
   const [isOpen, setIsOpen] = useState(false);
-
+  const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
+  const [isJoinTabModalOpen, setIsJoinModalOpen] = useState(false);
+  const [accessCodeData, setAccessCodeData] = useState({
+    accessCode: "",
+    expiresAt: new Date(),
+  });
   const handleToggle = () => setIsOpen((prev) => !prev);
+  const generateAccessCode = async () => {
+    const confirmGenerate = window.confirm(
+      "Do you want to generate a new access code?"
+    );
+    if (!confirmGenerate) return;
+
+    try {
+      const response = await AXIOS_TAB.post(`/${tabId}/accessCode`);
+      const { accessCode, expiresAt } = response.data.data;
+
+      setAccessCodeData({ accessCode, expiresAt });
+      setIsLinkModalOpen(true);
+    } catch (err) {
+      alert("Something went wrong while generating the access code.");
+      console.error(err);
+    }
+  };
 
   return (
     <div className="fixed bottom-6  z-10 right-6">
@@ -21,12 +46,20 @@ const ControlPanel = () => {
             isOpen ? "max-w-[500px]" : "max-w-0"
           }`}
         >
-          <button className=" bg-black/40 text-white font-bold p-3 rounded-full cursor-pointer hover:bg-black">
+          <button
+            onClick={() => setIsJoinModalOpen(true)}
+            className=" bg-black/40 text-white font-bold p-3 rounded-full cursor-pointer hover:bg-black"
+          >
             <Collab />
           </button>
-          <button className=" bg-black/40 text-white font-bold p-3 rounded-full cursor-pointer hover:bg-black">
-            <JoinLink />
-          </button>
+          {tabId && (
+            <button
+              onClick={generateAccessCode}
+              className=" bg-black/40 text-white font-bold p-3 rounded-full cursor-pointer hover:bg-black"
+            >
+              <JoinLink />
+            </button>
+          )}
 
           <div
             onClick={() => {
@@ -67,6 +100,16 @@ const ControlPanel = () => {
           </div>
         </button>
       </div>
+      <AccessCodeModal
+        isOpen={isLinkModalOpen}
+        onClose={() => setIsLinkModalOpen(false)}
+        accessCode={accessCodeData.accessCode}
+        expiresAt={accessCodeData.expiresAt}
+      />
+      <JoinTabModal
+        isOpen={isJoinTabModalOpen}
+        onClose={() => setIsJoinModalOpen(false)}
+      />
     </div>
   );
 };

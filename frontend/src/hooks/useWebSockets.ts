@@ -6,14 +6,21 @@ const useWebSockets = (
   setElements: React.Dispatch<SetStateAction<Element[]>>,
   collaborators: Collaborator[],
   tabId: string | undefined,
-  isValidTab: boolean
+  isValidTab: boolean,
+  locked: boolean
 ) => {
   const [othersDrawings, setOthersDrawings] = useState<Element[]>([]);
   const socketInstance = useRef<WebSocket | null>(null);
 
   useEffect(() => {
     const isLoggedIn = useUserInfoStore.getState().isLoggedIn;
-    if (!isLoggedIn || !tabId || !isValidTab || collaborators.length == 0) {
+    if (
+      !isLoggedIn ||
+      !tabId ||
+      !isValidTab ||
+      collaborators.length == 0 ||
+      locked
+    ) {
       return;
     }
 
@@ -60,7 +67,7 @@ const useWebSockets = (
     return () => {
       ws.close();
     };
-  }, [setElements, collaborators, tabId, isValidTab]);
+  }, [setElements, collaborators, tabId, isValidTab, locked]);
 
   return { socketInstance, othersDrawings };
 };

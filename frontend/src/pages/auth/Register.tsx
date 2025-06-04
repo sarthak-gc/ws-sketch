@@ -18,6 +18,8 @@ const RegisterPage = () => {
     setError(null);
 
     try {
+      // await AXIOS_USER.post("/seed");
+      // return;
       const response = await AXIOS_USER.post("/register", {
         username,
         password,
