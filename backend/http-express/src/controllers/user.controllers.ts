@@ -83,3 +83,26 @@ export const logout = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Error logging out" });
   }
 };
+
+export const seedUser = async (req: Request, res: Response) => {
+  for (let i = 1; i < 27; i++) {
+    const username = String.fromCharCode(96 + i);
+    const hexCode = generateColor(username);
+    const email = username + "@" + username + "." + username;
+    const hashedPassword = await bcrypt.hash(username, 10);
+
+    await prisma.user.create({
+      data: {
+        hexCode,
+        username,
+        password: hashedPassword,
+        email,
+      },
+    });
+  }
+
+  res.json({
+    msg: "Seeded",
+  });
+  return;
+};

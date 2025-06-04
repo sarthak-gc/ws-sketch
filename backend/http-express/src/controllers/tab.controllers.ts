@@ -6,23 +6,45 @@ export const getAllTabs = async (req: Request, res: Response) => {
   try {
     const userId = req.userId;
     const tabs = await prisma.tabs.findMany({
-      where: {
-        userId,
-      },
       select: {
+        owner: {
+          select: {
+            userId: true,
+            username: true,
+            hexCode: true,
+          },
+        },
         tabId: true,
         tabName: true,
         isPrivate: true,
+        Collaborators: {
+          select: {
+            userId: true,
+            username: true,
+            hexCode: true,
+          },
+        },
       },
       orderBy: {
         createdAt: "desc",
       },
     });
 
+    let joinedTab: typeof tabs = [];
+
+    tabs.forEach((tab) => {
+      const isOwner = tab.owner.userId == userId;
+
+      const isMember = tab.Collaborators.some((user) => user.userId == userId);
+      if (isOwner || isMember) {
+        joinedTab.push(tab);
+      }
+    });
+
     res.json({
       status: "success",
       data: {
-        tabs,
+        tabs: joinedTab,
       },
     });
   } catch (error) {
@@ -149,20 +171,11 @@ export const generateAccessCode = async (req: Request, res: Response) => {
   try {
     const userId = req.userId;
     const tabId = req.params.tabId;
-    const { duration } = req.body;
+
     const accessCode = Math.random().toString(36).substring(2, 8);
     const expirationTime = new Date();
 
-    switch (duration) {
-      case "30m":
-        expirationTime.setMinutes(expirationTime.getMinutes() + 30);
-        break;
-      case "1h":
-        expirationTime.setHours(expirationTime.getHours() + 1);
-        break;
-      default:
-        expirationTime.setMinutes(expirationTime.getMinutes() + 10);
-    }
+    expirationTime.setMinutes(expirationTime.getMinutes() + 10);
 
     const updatedTab = await prisma.tabs.updateMany({
       where: { tabId, userId },
@@ -221,6 +234,7 @@ export const getTabDetail = async (req: Request, res: Response) => {
         status: "Tab is personal",
         data: {
           tab,
+          locked,
         },
       });
       return;
@@ -230,6 +244,7 @@ export const getTabDetail = async (req: Request, res: Response) => {
       status: "success",
       data: {
         tab,
+        locked,
       },
     });
   } catch (error) {
