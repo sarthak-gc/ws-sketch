@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, type MouseEvent } from "react";
-import type { Actions, Collaborator, Element, Shapes } from "../types/types";
+import type { Collaborator, Element, Shapes } from "../types/types";
 
 import { isInTheEnds } from "../utils/isInTheEnds";
 import { elementThere } from "../utils/elementThere";
@@ -21,10 +21,11 @@ import { AXIOS_TAB } from "../utils/axios/axios";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useTabStore } from "../store/tabStore";
 import { AxiosError } from "axios";
+import { useWorkSpaceStore } from "../store/workSpaceStore";
 
 const WorkSpace = () => {
   const [selectedShape, setSelectedShape] = useState<Shapes>("Rectangle");
-  const [action, setAction] = useState<Actions | null>();
+  const { action, setAction } = useWorkSpaceStore();
   const [elements, setElements] = useState<Element[]>([]);
   const [posX, setPosX] = useState(0);
   const [posY, setPosY] = useState(0);
@@ -281,7 +282,7 @@ const WorkSpace = () => {
         //     : { ...el, color: hexCode }
         // );
         // setElements(updatedElements);
-        setResizeElement(null);
+        setResizeElement(elements[i]);
         setCursorDirection(null);
         if (grabbedElement?.id != elements[i].id) {
           setGrabbedElement({ ...elements[i] });
@@ -299,17 +300,25 @@ const WorkSpace = () => {
   const handleMouseDown = (e: MouseEvent) => {
     const id = crypto.randomUUID();
     if (resizeElem) {
-      setAction("Resizing");
       if (resizeElem.shape === "Line") {
         const result = isInTheEnds(resizeElem, e.clientX, e.clientY);
         if (result.status) {
+          setAction("Resizing");
           setCornerSide({ side: result.side });
+        } else {
+          setAction("Grabbing");
         }
       } else if (resizeElem.shape === "Rectangle") {
         const result = isInTheEdges(resizeElem, e.clientX, e.clientY);
         if (result.status) {
+          setAction("Resizing");
           setCornerSide({ corner: result.corner });
+        } else {
+          setAction("Grabbing");
         }
+      } else {
+        //TODO : ofr other elements, no resizing logic check,
+        setAction("Grabbing");
       }
       return;
     }

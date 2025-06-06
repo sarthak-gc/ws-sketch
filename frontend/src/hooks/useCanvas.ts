@@ -19,10 +19,7 @@ const useCanvas = (
 
     ctx?.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
 
-    const elementsC = elements.map((elem) => {
-      return { ...elem, color: undefined };
-    });
-    localStorage.setItem("elements", JSON.stringify(elementsC));
+    localStorage.setItem("elements", JSON.stringify(elements));
 
     elements.forEach((elem: Element) => {
       const shape = getShape(elem);

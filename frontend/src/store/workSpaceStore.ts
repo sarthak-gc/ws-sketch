@@ -7,20 +7,20 @@ interface workSpaceStoreI {
   copiedElement: Element | null;
   elements: Element[];
   shape: Shapes | null;
-  action: Actions;
+  action: Actions | null;
   drawingElement: Element | null;
 
   setGrabbedElement: (elem: Element | null) => void;
   setCopiedElement: (elem: Element | null) => void;
   setElements: (elem: Element[] | Element) => void;
   setShape: (val: Shapes) => void;
-  setAction: (val: Actions) => void;
+  setAction: (val: Actions | null) => void;
   setDrawingElement: (elem: Element) => void;
   clearDrawingElement: (val: null) => void;
   clearGrabbedElement: (val: null) => void;
 }
 
-export const userWorkSpaceStore = create<workSpaceStoreI>()(
+export const useWorkSpaceStore = create<workSpaceStoreI>()(
   persist(
     (set) => ({
       grabbedElement: null,
@@ -31,7 +31,7 @@ export const userWorkSpaceStore = create<workSpaceStoreI>()(
       action: "Drawing",
 
       setShape: (val: Shapes) => set(() => ({ shape: val })),
-      setAction: (val: Actions) => set(() => ({ action: val })),
+      setAction: (val: Actions | null) => set(() => ({ action: val })),
 
       setDrawingElement: (elem: Element) =>
         set(() => ({ drawingElement: elem })),
