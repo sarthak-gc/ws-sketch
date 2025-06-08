@@ -3,7 +3,6 @@ import { getPrisma } from "../utils/getPrisma";
 import { Prisma } from "@prisma/client";
 
 export const getAllTabs = async (c: Context) => {
-  console.log("here");
   try {
     const userId = c.req.userId;
     const prisma = getPrisma(c);

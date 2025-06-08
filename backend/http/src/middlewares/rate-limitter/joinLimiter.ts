@@ -10,7 +10,6 @@ const joinRequests: JoinRequestI = {};
 
 export const joinLimiter = async (c: Context, next: Next) => {
   const userId = c.req.userId;
-  console.log(userId);
   const gap = 5 * 60 * 1000;
   const currentTime = Date.now();
 

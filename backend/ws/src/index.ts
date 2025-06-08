@@ -24,15 +24,13 @@ interface ConnectionI {
 let elements: Map<string, Map<string, Element>> = new Map();
 let currentDrawingElement: Map<string, Element> = new Map();
 let currentMovingElement: Map<string, Element> = new Map();
+let currentResizingElement: Map<string, Element> = new Map();
 
 let connections: ConnectionI = {};
 
 wss.on("connection", (socket: WebSocketWithId) => {
   socket.id = v4();
   console.log("User connected with id", socket.id);
-  // connections.push(socket)
-
-  // const arrayfiedElements = Array.from(elements.values());
 
   socket.on("message", (e) => {
     let msg;
@@ -68,13 +66,12 @@ wss.on("connection", (socket: WebSocketWithId) => {
 
       connections[msg.tabId].forEach((connection) => {
         if (connection.id != socket.id) {
-          // console.log(message.existingElements, "HI");
           connection.send(JSON.stringify(message));
         }
       });
     }
 
-    if (msg.type == "join") {
+   if (msg.type == "join") {
       socket.send(
         JSON.stringify({
           existingElements: Object.fromEntries(
@@ -89,33 +86,35 @@ wss.on("connection", (socket: WebSocketWithId) => {
     }
 
     if (msg.type == "resize") {
-      const elementId = msg.elementId;
+      const username = Object.keys(msg)[1];
       const value = Object.values(msg)[1] as Element;
-      if (!elementId) {
-        socket.send("elementId Needed");
+
+      if (!username) {
+        socket.send("username Needed");
         return;
       }
 
-      currentMovingElement.set(elementId, value);
+      currentResizingElement.set(username, value);
 
       if (!elements.has(msg.tabId)) {
         elements.set(msg.tabId, new Map());
       }
       elements.get(msg.tabId)?.set(value.id, value);
-      let serializedCurrentMovingElement = Object.fromEntries(
-        currentMovingElement.entries()
+
+      let serializedCurrentResizingElement = Object.fromEntries(
+        currentResizingElement.entries()
       );
       const message = {
-        type: "move",
-        movingElement: serializedCurrentMovingElement,
+        type: "resize",
+        resizingElement: serializedCurrentResizingElement,
       };
-      console.log(currentMovingElement);
       connections[msg.tabId].forEach((connection) => {
         if (connection.id != socket.id) {
           connection.send(JSON.stringify(message));
         }
       });
     }
+
     if (msg.type == "move") {
       const elementId = msg.elementId;
       const value = Object.values(msg)[1] as Element;
@@ -137,7 +136,7 @@ wss.on("connection", (socket: WebSocketWithId) => {
         type: "move",
         movingElement: serializedCurrentMovingElement,
       };
-      console.log(currentMovingElement);
+
       connections[msg.tabId].forEach((connection) => {
         if (connection.id != socket.id) {
           connection.send(JSON.stringify(message));

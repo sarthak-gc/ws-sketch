@@ -74,7 +74,6 @@ JoinTabModalI) => {
           resolve(undefined);
         }, 1500);
       }).then(() => {
-        console.log("HI THERE");
         navigate(`/${response.data.tabDets.tabId}`);
       });
     } else {

@@ -23,6 +23,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { useTabStore } from "../store/tabStore";
 import { AxiosError } from "axios";
 import { useWorkSpaceStore } from "../store/workSpaceStore";
+import useSendCurrentResizingElement from "../hooks/useResizeElement";
 
 const WorkSpace = () => {
   const [selectedShape, setSelectedShape] = useState<Shapes>("Rectangle");
@@ -68,7 +69,8 @@ const WorkSpace = () => {
 
   const isMobile = useDetectMobile();
   useBeforeInstallPrompt();
-  const { socketInstance, othersDrawings } = useWebSockets(
+  // const { socketInstance, othersDrawings } = useWebSockets(
+  const { socketInstance } = useWebSockets(
     setElements,
     collaborators,
     tabId,
@@ -78,8 +80,16 @@ const WorkSpace = () => {
   useDebouncedWs(socketInstance, elements);
   useSendCurrentDrawingElement(socketInstance, element);
   useSendCurrentMovingElement(socketInstance, grabbedElement, posX, posY);
+  useSendCurrentResizingElement(
+    socketInstance,
+    grabbedElement,
+    posX,
+    posY,
+    cornerSide,
+    elements
+  );
   useLocalStorage(setIsLoading, setShowTutorial);
-  const { canvasRef } = useCanvas(elements, element, othersDrawings);
+  const { canvasRef } = useCanvas(elements, element);
 
   useEffect(() => {
     const getCollaborators = async () => {
@@ -270,6 +280,8 @@ const WorkSpace = () => {
           return el;
         })
       );
+      setPosX(e.clientX);
+      setPosY(e.clientY);
       return;
     }
 

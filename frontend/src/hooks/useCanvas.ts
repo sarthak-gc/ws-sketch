@@ -6,8 +6,8 @@ import { drawShape, getShape } from "../utils/canvas/draw";
 
 const useCanvas = (
   elements: Element[],
-  element: Element | null,
-  othersDrawings: Element[]
+  element: Element | null
+  // othersDrawings: Element[]
 ) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
@@ -29,13 +29,13 @@ const useCanvas = (
       drawShape(rc, shape);
     }
 
-    if (othersDrawings.length > 0) {
-      othersDrawings.forEach((drawing) => {
-        const shape = getShape(drawing);
-        drawShape(rc, shape);
-      });
-    }
-  }, [elements, element, othersDrawings]);
+    // if (othersDrawings.length > 0) {
+    //   othersDrawings.forEach((drawing) => {
+    //     const shape = getShape(drawing);
+    //     drawShape(rc, shape);
+    //   });
+    // }
+  }, [elements, element]);
 
   return { canvasRef };
 };

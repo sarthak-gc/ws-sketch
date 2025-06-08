@@ -14,7 +14,6 @@ export const joinLimiter = async (
   next: NextFunction
 ) => {
   const userId = req.userId;
-  console.log(userId);
   const gap = 5 * 60 * 1000;
   const currentTime = Date.now();
 

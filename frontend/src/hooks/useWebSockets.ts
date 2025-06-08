@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type SetStateAction } from "react";
+import { useEffect, useRef, type SetStateAction } from "react";
 import { useUserInfoStore } from "../store/userInfoStore";
 import type { Collaborator, Element } from "../types/types";
 
@@ -9,7 +9,7 @@ const useWebSockets = (
   isValidTab: boolean,
   locked: boolean
 ) => {
-  const [othersDrawings, setOthersDrawings] = useState<Element[]>([]);
+  // const [othersDrawings, setOthersDrawings] = useState<Element[]>([]);
   const socketInstance = useRef<WebSocket | null>(null);
 
   useEffect(() => {
@@ -75,18 +75,37 @@ const useWebSockets = (
             const drawingElements: Element[] = Array.from(
               Object.values(elem.drawingElements || {})
             );
-            setOthersDrawings(drawingElements);
+            // setOthersDrawings(drawingElements);
+            setElements((prev) => {
+              const allElements = [...prev, ...drawingElements];
+              const uniqueById = Array.from(
+                new Map(allElements.map((item) => [item.id, item])).values()
+              );
+              return uniqueById;
+            });
+          } else if (elem.type === "resize") {
+            const resizingElement: Element[] = Array.from(
+              Object.values(elem.resizingElement || {})
+            );
+            setElements((prev) => {
+              const allElements = [...prev, ...resizingElement];
+
+              const uniqueById = Array.from(
+                new Map(allElements.map((item) => [item.id, item])).values()
+              );
+              return uniqueById;
+            });
           }
         }
       }
     };
-
     return () => {
       ws.close();
     };
   }, [setElements, collaborators, tabId, isValidTab, locked]);
 
-  return { socketInstance, othersDrawings };
+  // return { socketInstance, othersDrawings };
+  return { socketInstance };
 };
 
 export default useWebSockets;
