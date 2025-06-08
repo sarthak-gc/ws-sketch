@@ -49,17 +49,34 @@ const useWebSockets = (
       } finally {
         if (elem != "UserId Needed") {
           const existingElements: Element[] = Array.from(
-            Object.values(elem.existingElements)
+            Object.values(elem.existingElements || {})
           );
-
-          const drawingElements: Element[] = Array.from(
-            Object.values(elem.drawingElements || {})
-          );
-
           setElements((prev) => {
-            return [...prev, ...existingElements];
+            const allElements = [...prev, ...existingElements];
+            const uniqueById = Array.from(
+              new Map(allElements.map((item) => [item.id, item])).values()
+            );
+            return uniqueById;
           });
-          setOthersDrawings(drawingElements);
+
+          if (elem.type === "move") {
+            const movingElement: Element[] = Array.from(
+              Object.values(elem.movingElement || {})
+            );
+
+            setElements((prev) => {
+              const allElements = [...prev, ...movingElement];
+              const uniqueById = Array.from(
+                new Map(allElements.map((item) => [item.id, item])).values()
+              );
+              return uniqueById;
+            });
+          } else if (elem.type === "draw") {
+            const drawingElements: Element[] = Array.from(
+              Object.values(elem.drawingElements || {})
+            );
+            setOthersDrawings(drawingElements);
+          }
         }
       }
     };

@@ -70,6 +70,45 @@ export const getAllTabs = async (c: Context) => {
   }
 };
 
+export const getAllTabsName = async (c: Context) => {
+  try {
+    const userId = c.req.userId;
+    const prisma = getPrisma(c);
+    const tabs = await prisma.tabs.findMany({
+      select: {
+        tabId: true,
+        tabName: true,
+        isPrivate: true,
+        userId: true,
+        Collaborators: {
+          select: {
+            userId: true,
+          },
+        },
+      },
+    });
+
+    let joinedTab: typeof tabs = [];
+
+    tabs.forEach((tab) => {
+      const isOwner = tab.userId == userId;
+      const isMember = tab.Collaborators.some((user) => user.userId == userId);
+      if (isOwner || isMember) {
+        joinedTab.push(tab);
+      }
+    });
+
+    return c.json({
+      status: "success",
+      data: {
+        tabs: joinedTab,
+      },
+    });
+  } catch (error) {
+    c.status(500);
+    return c.json({ status: "error", message: "An unexpected error occurred" });
+  }
+};
 export const createTab = async (c: Context) => {
   try {
     const userId = c.req.userId;

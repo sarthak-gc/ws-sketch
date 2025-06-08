@@ -23,6 +23,7 @@ interface ConnectionI {
 
 let elements: Map<string, Map<string, Element>> = new Map();
 let currentDrawingElement: Map<string, Element> = new Map();
+let currentMovingElement: Map<string, Element> = new Map();
 
 let connections: ConnectionI = {};
 
@@ -60,12 +61,14 @@ wss.on("connection", (socket: WebSocketWithId) => {
       );
 
       const message = {
+        type: "draw",
         existingElements: elements,
         drawingElements: serializedCurrentDrawingElement,
       };
 
       connections[msg.tabId].forEach((connection) => {
         if (connection.id != socket.id) {
+          // console.log(message.existingElements, "HI");
           connection.send(JSON.stringify(message));
         }
       });
@@ -84,8 +87,65 @@ wss.on("connection", (socket: WebSocketWithId) => {
       }
       connections[msg.tabId].push(socket);
     }
+
+    if (msg.type == "resize") {
+      const elementId = msg.elementId;
+      const value = Object.values(msg)[1] as Element;
+      if (!elementId) {
+        socket.send("elementId Needed");
+        return;
+      }
+
+      currentMovingElement.set(elementId, value);
+
+      if (!elements.has(msg.tabId)) {
+        elements.set(msg.tabId, new Map());
+      }
+      elements.get(msg.tabId)?.set(value.id, value);
+      let serializedCurrentMovingElement = Object.fromEntries(
+        currentMovingElement.entries()
+      );
+      const message = {
+        type: "move",
+        movingElement: serializedCurrentMovingElement,
+      };
+      console.log(currentMovingElement);
+      connections[msg.tabId].forEach((connection) => {
+        if (connection.id != socket.id) {
+          connection.send(JSON.stringify(message));
+        }
+      });
+    }
+    if (msg.type == "move") {
+      const elementId = msg.elementId;
+      const value = Object.values(msg)[1] as Element;
+      if (!elementId) {
+        socket.send("elementId Needed");
+        return;
+      }
+
+      currentMovingElement.set(elementId, value);
+
+      if (!elements.has(msg.tabId)) {
+        elements.set(msg.tabId, new Map());
+      }
+      elements.get(msg.tabId)?.set(value.id, value);
+      let serializedCurrentMovingElement = Object.fromEntries(
+        currentMovingElement.entries()
+      );
+      const message = {
+        type: "move",
+        movingElement: serializedCurrentMovingElement,
+      };
+      console.log(currentMovingElement);
+      connections[msg.tabId].forEach((connection) => {
+        if (connection.id != socket.id) {
+          connection.send(JSON.stringify(message));
+        }
+      });
+    }
   });
-  console.log(connections);
+
   socket.on("close", () => {
     for (const tabId in connections) {
       connections[tabId] = connections[tabId].filter(

@@ -47,31 +47,36 @@ JoinTabModalI) => {
         // });
       }
 
-      navigate(`/${response.data.tabDets.tabId}`);
-      const a = {
-        collaborators: [
-          {
-            userId: "9f9a7103-56ad-47d4-8a77-80b583c7a7c4",
-            username: "b",
-            hexCode: "#3e23e86d",
-            isOnline: false,
-          },
-        ],
-        accessCode: "m4nxuw",
-        accessCodeExpiration: "2025-06-04T15:01:14.933Z",
-        createdAt: "2025-06-04T14:51:00.534Z",
-        elements: null,
-        isEditable: false,
-        isPrivate: true,
-        sharableLink: null,
-        tabId: "ed9e599f-ea6c-408f-b3b9-0a5d0313aa22",
-        tabName: "New Tab",
-        updatedAt: "2025-06-04T14:51:15.151Z",
-        userId: "e4c948c4-638b-4e56-baff-4b74dc46fdfc",
-      };
-      console.log(a);
+      // const a = {
+      //   collaborators: [
+      //     {
+      //       userId: "9f9a7103-56ad-47d4-8a77-80b583c7a7c4",
+      //       username: "b",
+      //       hexCode: "#3e23e86d",
+      //       isOnline: false,
+      //     },
+      //   ],
+      //   accessCode: "m4nxuw",
+      //   accessCodeExpiration: "2025-06-04T15:01:14.933Z",
+      //   createdAt: "2025-06-04T14:51:00.534Z",
+      //   elements: null,
+      //   isEditable: false,
+      //   isPrivate: true,
+      //   sharableLink: null,
+      //   tabId: "ed9e599f-ea6c-408f-b3b9-0a5d0313aa22",
+      //   tabName: "New Tab",
+      //   updatedAt: "2025-06-04T14:51:15.151Z",
+      //   userId: "e4c948c4-638b-4e56-baff-4b74dc46fdfc",
+      // };
 
-      alert(response.data.message);
+      new Promise<void>((resolve) => {
+        setTimeout(() => {
+          resolve(undefined);
+        }, 1500);
+      }).then(() => {
+        console.log("HI THERE");
+        navigate(`/${response.data.tabDets.tabId}`);
+      });
     } else {
       alert("Enter a valid code");
     }

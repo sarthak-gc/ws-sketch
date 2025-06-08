@@ -28,7 +28,7 @@ export const useWorkSpaceStore = create<workSpaceStoreI>()(
       copiedElement: null,
       shape: null,
       drawingElement: null,
-      action: "Drawing",
+      action: null,
 
       setShape: (val: Shapes) => set(() => ({ shape: val })),
       setAction: (val: Actions | null) => set(() => ({ action: val })),

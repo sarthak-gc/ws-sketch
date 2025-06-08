@@ -7,6 +7,7 @@ export const getAllTabs = async (req: Request, res: Response) => {
     const userId = req.userId;
     const tabs = await prisma.tabs.findMany({
       select: {
+        elements: true,
         owner: {
           select: {
             userId: true,
@@ -35,6 +36,45 @@ export const getAllTabs = async (req: Request, res: Response) => {
     tabs.forEach((tab) => {
       const isOwner = tab.owner.userId == userId;
 
+      const isMember = tab.Collaborators.some((user) => user.userId == userId);
+      if (isOwner || isMember) {
+        joinedTab.push(tab);
+      }
+    });
+
+    res.json({
+      status: "success",
+      data: {
+        tabs: joinedTab,
+      },
+    });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ status: "error", message: "An unexpected error occurred" });
+  }
+};
+export const getAllTabsName = async (req: Request, res: Response) => {
+  try {
+    const userId = req.userId;
+    const tabs = await prisma.tabs.findMany({
+      select: {
+        tabId: true,
+        tabName: true,
+        isPrivate: true,
+        userId: true,
+        Collaborators: {
+          select: {
+            userId: true,
+          },
+        },
+      },
+    });
+
+    let joinedTab: typeof tabs = [];
+
+    tabs.forEach((tab) => {
+      const isOwner = tab.userId == userId;
       const isMember = tab.Collaborators.some((user) => user.userId == userId);
       if (isOwner || isMember) {
         joinedTab.push(tab);

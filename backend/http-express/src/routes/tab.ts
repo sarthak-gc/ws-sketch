@@ -9,6 +9,7 @@ import {
   getTabDetail,
   joinTab,
   removeTab,
+  getAllTabsName,
 } from "../controllers/tab.controllers";
 import { authMiddleware } from "../middlewares/authMiddleware";
 import { joinLimiter } from "../middlewares/rate-limitter/joinLimiter";
@@ -16,8 +17,9 @@ const tabRoutes = express.Router();
 
 tabRoutes.use(authMiddleware);
 tabRoutes.get("/all", getAllTabs);
+tabRoutes.get("/all/name", getAllTabsName);
 tabRoutes.post("/create", createTab);
-tabRoutes.post("/join/:accessCode",joinLimiter, joinTab);
+tabRoutes.post("/join/:accessCode", joinLimiter, joinTab);
 tabRoutes.post("/:tabId/remove", removeTab);
 tabRoutes.put("/:tabId/name", changeTabName);
 tabRoutes.put("/:tabId/visibility", changeTabVisibility);

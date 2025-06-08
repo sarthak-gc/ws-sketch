@@ -12,7 +12,7 @@ const Sidebar = () => {
   const navigate = useNavigate();
   useEffect(() => {
     const getTabs = async () => {
-      const response = await AXIOS_TAB.get("/all");
+      const response = await AXIOS_TAB.get("/all/name");
       setTabs(response.data.data.tabs);
     };
     getTabs();

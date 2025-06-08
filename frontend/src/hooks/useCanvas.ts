@@ -19,8 +19,6 @@ const useCanvas = (
 
     ctx?.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
 
-    localStorage.setItem("elements", JSON.stringify(elements));
-
     elements.forEach((elem: Element) => {
       const shape = getShape(elem);
       drawShape(rc, shape);

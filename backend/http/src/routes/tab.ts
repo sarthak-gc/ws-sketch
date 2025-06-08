@@ -6,6 +6,7 @@ import {
   createTab,
   generateAccessCode,
   getAllTabs,
+  getAllTabsName,
   getTabDetail,
   joinTab,
   removeTab,
@@ -16,6 +17,7 @@ const tabRoutes = new Hono();
 
 tabRoutes.use(authMiddleware);
 tabRoutes.get("/all", getAllTabs);
+tabRoutes.get("/all/name", getAllTabsName);
 tabRoutes.post("/create", createTab);
 tabRoutes.post("/join/:accessCode", joinLimiter, joinTab);
 tabRoutes.post("/:tabId/remove", removeTab);

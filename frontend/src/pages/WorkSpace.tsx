@@ -14,6 +14,7 @@ import useLocalStorage from "../hooks/useLocalStorage";
 import useCanvas from "../hooks/useCanvas";
 import useDebouncedWs from "../hooks/useDebouncedWs";
 import useSendCurrentDrawingElement from "../hooks/useDrawingElement";
+import useSendCurrentMovingElement from "../hooks/useMovingElement";
 import ControlPanel from "../components/ControlPanel";
 import Sidebar from "../components/Sidebar";
 import { useUserInfoStore } from "../store/userInfoStore";
@@ -53,7 +54,7 @@ const WorkSpace = () => {
   const userId = useUserInfoStore().user?.userId;
   const activeTabId = useTabStore().activeTabId;
   const tabId = useParams().tabId;
-  const hexCode = useUserInfoStore.getState().user?.hexCode || "red";
+  const hexCode = useUserInfoStore.getState().user?.hexCode || "black";
 
   useEffect(() => {
     const setActiveTabId = useTabStore.getState().setActiveTabId;
@@ -76,7 +77,8 @@ const WorkSpace = () => {
   );
   useDebouncedWs(socketInstance, elements);
   useSendCurrentDrawingElement(socketInstance, element);
-  useLocalStorage(setIsLoading, setElements, setShowTutorial);
+  useSendCurrentMovingElement(socketInstance, grabbedElement, posX, posY);
+  useLocalStorage(setIsLoading, setShowTutorial);
   const { canvasRef } = useCanvas(elements, element, othersDrawings);
 
   useEffect(() => {
@@ -201,17 +203,17 @@ const WorkSpace = () => {
     const centerX = e.clientX;
     const centerY = e.clientY;
     setElements((prev) =>
-      prev.map((elem) =>
-        elem.id === grabbedElement.id
+      prev.map((elem) => {
+        return elem.id === grabbedElement.id
           ? {
               ...elem,
-              X1: centerX - width / 2,
-              Y1: centerY - height / 2,
-              X2: centerX + width / 2,
-              Y2: centerY + height / 2,
+              X1: Math.abs(centerX - width / 2),
+              Y1: Math.abs(centerY - height / 2),
+              X2: Math.abs(centerX + width / 2),
+              Y2: Math.abs(centerY + height / 2),
             }
-          : elem
-      )
+          : elem;
+      })
     );
 
     setPosX(e.clientX);
