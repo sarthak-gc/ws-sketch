@@ -23,6 +23,6 @@
     "uuid": "^11.1.0"
   },
   "devDependencies": {
-    "wrangler": "^4.4.0"
+    "wrangler": "^4.19.1"
   }
 }

@@ -24,11 +24,12 @@ import { useTabStore } from "../store/tabStore";
 import { AxiosError } from "axios";
 import { useWorkSpaceStore } from "../store/workSpaceStore";
 import useSendCurrentResizingElement from "../hooks/useResizeElement";
+import { useAppStore } from "../store/appStore";
 
 const WorkSpace = () => {
   const [selectedShape, setSelectedShape] = useState<Shapes>("Rectangle");
   const { action, setAction } = useWorkSpaceStore();
-  const [elements, setElements] = useState<Element[]>([]);
+  const { elements, setElements } = useWorkSpaceStore.getState();
   const [posX, setPosX] = useState(0);
   const [posY, setPosY] = useState(0);
   const [element, setElement] = useState<Element | null>(null);
@@ -71,7 +72,6 @@ const WorkSpace = () => {
   useBeforeInstallPrompt();
   // const { socketInstance, othersDrawings } = useWebSockets(
   const { socketInstance } = useWebSockets(
-    setElements,
     collaborators,
     tabId,
     isValidTab,
@@ -95,11 +95,22 @@ const WorkSpace = () => {
     const getCollaborators = async () => {
       try {
         const response = await AXIOS_TAB.get(`/${tabId}/detail`);
+        const addRecentTab = useAppStore.getState().setRecent5Tabs;
         setIsValidTab(true);
         const collaborators: Collaborator[] =
           response.data.data.tab.Collaborators;
         setCollaborators(collaborators);
         setIsLocked(response.data.data.locked);
+        addRecentTab({
+          Collaborators: collaborators,
+          owner: response.data.data.tab.owner,
+          elements: response.data.data.tab.elements,
+          isEditable: true,
+          tabId: "string",
+          tabName: "string",
+          isPrivate: false,
+          createdAt: new Date(),
+        });
       } catch (err) {
         if (err instanceof AxiosError) {
           console.error(err.response?.data.message);
@@ -136,7 +147,7 @@ const WorkSpace = () => {
     });
     setElements(updatedElements);
     setGrabbedElement(null);
-  }, [grabbedElement?.id, elements]);
+  }, [grabbedElement?.id, elements, setElements]);
 
   const clearEverything = useCallback(() => {
     if (!canvasRef.current) {
@@ -147,7 +158,7 @@ const WorkSpace = () => {
     setElements([]);
     localStorage.clear();
     localStorage.setItem("show_tutorial", String(false));
-  }, [canvasRef]);
+  }, [canvasRef, setElements]);
 
   const handleKeyPress = useCallback(
     (e: KeyboardEvent) => {
@@ -212,8 +223,8 @@ const WorkSpace = () => {
 
     const centerX = e.clientX;
     const centerY = e.clientY;
-    setElements((prev) =>
-      prev.map((elem) => {
+    setElements(
+      elements.map((elem) => {
         return elem.id === grabbedElement.id
           ? {
               ...elem,
@@ -249,8 +260,8 @@ const WorkSpace = () => {
     }
 
     if (action == "Resizing" && resizeElem && cornerSide) {
-      setElements((prev) =>
-        prev.map((el) => {
+      setElements(
+        elements.map((el) => {
           if (el.id !== resizeElem.id) return el;
 
           if (resizeElem.shape === "Line") {
@@ -359,7 +370,23 @@ const WorkSpace = () => {
         return;
       }
 
-      setElements((prev) => [...prev, element]);
+      setElements([...elements, element]);
+      if (tabId) {
+        // grabbedElement: Element | null;
+        // copiedElement: Element | null;
+        // elements: Element[];
+        // shape: Shapes | null;
+        // action: Actions | null;
+        // drawingElement: Element | null;
+        // setGrabbedElement: (elem: Element | null) => void;
+        // setCopiedElement: (elem: Element | null) => void;
+        // setElements: (elem: Element[] | Element) => void;
+        // setShape: (val: Shapes) => void;
+        // setAction: (val: Actions | null) => void;
+        // setDrawingElement: (elem: Element) => void;
+        // clearDrawingElement: (val: null) => void;
+        // clearGrabbedElement: (val: null) => void;
+      }
       setElement(null);
     }
 

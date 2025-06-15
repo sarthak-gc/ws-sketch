@@ -3,6 +3,7 @@ import { useAppStore } from "../store/appStore";
 import { AXIOS_TAB } from "../utils/axios/axios";
 import Add from "./Svg/Add";
 import { useNavigate } from "react-router-dom";
+import RecentlyOpenedTabs from "./RecentlyOpenedTabs";
 
 const Sidebar = () => {
   const [showSidebar, setShowSidebar] = useState<boolean>(false);
@@ -66,6 +67,8 @@ const Sidebar = () => {
             showSidebar ? "w-60" : "hidden"
           } bg-[#ddd] overflow-auto border-r-2 border-gray-900 shadow-lg flex flex-col gap-1 items-end py-5 px-2 h-full transition-all duration-1000`}
         >
+          <h1>Recently opened tabs</h1>
+          <RecentlyOpenedTabs />
           <div
             onClick={handleClick}
             className=" bg-black/40 text-white font-bold   cursor-pointer hover:bg-black"

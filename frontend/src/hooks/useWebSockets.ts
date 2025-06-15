@@ -1,9 +1,9 @@
-import { useEffect, useRef, type SetStateAction } from "react";
+import { useEffect, useRef } from "react";
 import { useUserInfoStore } from "../store/userInfoStore";
 import type { Collaborator, Element } from "../types/types";
+import { useWorkSpaceStore } from "../store/workSpaceStore";
 
 const useWebSockets = (
-  setElements: React.Dispatch<SetStateAction<Element[]>>,
   collaborators: Collaborator[],
   tabId: string | undefined,
   isValidTab: boolean,
@@ -11,7 +11,8 @@ const useWebSockets = (
 ) => {
   // const [othersDrawings, setOthersDrawings] = useState<Element[]>([]);
   const socketInstance = useRef<WebSocket | null>(null);
-
+  const setElements = useWorkSpaceStore().setElements;
+  const elements = useWorkSpaceStore().elements;
   useEffect(() => {
     const isLoggedIn = useUserInfoStore.getState().isLoggedIn;
     if (
@@ -51,50 +52,42 @@ const useWebSockets = (
           const existingElements: Element[] = Array.from(
             Object.values(elem.existingElements || {})
           );
-          setElements((prev) => {
-            const allElements = [...prev, ...existingElements];
-            const uniqueById = Array.from(
-              new Map(allElements.map((item) => [item.id, item])).values()
-            );
-            return uniqueById;
-          });
+          const allElements = [...elements, ...existingElements];
+
+          const uniqueById = Array.from(
+            new Map(allElements.map((item) => [item.id, item])).values()
+          );
+          setElements(uniqueById);
 
           if (elem.type === "move") {
             const movingElement: Element[] = Array.from(
               Object.values(elem.movingElement || {})
             );
-
-            setElements((prev) => {
-              const allElements = [...prev, ...movingElement];
-              const uniqueById = Array.from(
-                new Map(allElements.map((item) => [item.id, item])).values()
-              );
-              return uniqueById;
-            });
+            const allElements = [...elements, ...movingElement];
+            const uniqueById = Array.from(
+              new Map(allElements.map((item) => [item.id, item])).values()
+            );
+            setElements(uniqueById);
           } else if (elem.type === "draw") {
             const drawingElements: Element[] = Array.from(
               Object.values(elem.drawingElements || {})
             );
+            const allElements = [...elements, ...drawingElements];
+            const uniqueById = Array.from(
+              new Map(allElements.map((item) => [item.id, item])).values()
+            );
             // setOthersDrawings(drawingElements);
-            setElements((prev) => {
-              const allElements = [...prev, ...drawingElements];
-              const uniqueById = Array.from(
-                new Map(allElements.map((item) => [item.id, item])).values()
-              );
-              return uniqueById;
-            });
+            setElements(uniqueById);
           } else if (elem.type === "resize") {
             const resizingElement: Element[] = Array.from(
               Object.values(elem.resizingElement || {})
             );
-            setElements((prev) => {
-              const allElements = [...prev, ...resizingElement];
+            const allElements = [...elements, ...resizingElement];
 
-              const uniqueById = Array.from(
-                new Map(allElements.map((item) => [item.id, item])).values()
-              );
-              return uniqueById;
-            });
+            const uniqueById = Array.from(
+              new Map(allElements.map((item) => [item.id, item])).values()
+            );
+            setElements(uniqueById);
           }
         }
       }
@@ -102,7 +95,7 @@ const useWebSockets = (
     return () => {
       ws.close();
     };
-  }, [setElements, collaborators, tabId, isValidTab, locked]);
+  }, [setElements, collaborators, tabId, isValidTab, locked, elements]);
 
   // return { socketInstance, othersDrawings };
   return { socketInstance };
